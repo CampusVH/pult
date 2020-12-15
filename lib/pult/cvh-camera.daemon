@@ -1,0 +1,93 @@
+#!/bin/bash
+
+debug=true
+
+module_name="$1"
+channel="$2"
+camera_room="$((1000 + channel))"
+browser=true
+direct=false
+
+. "/usr/local/etc/pult/pult.conf"
+. "/usr/local/lib/pult/pult.functions"
+
+pid_file="$run_directory/$module_name-$channel.pid"
+$debug && echo "$0[$channel]: pid_file = $pid_file" 1>&2
+
+module ()
+{
+  m="$1"
+  shift 2
+  if [ "$m" = "$module_name" ]; then
+    for opt in "$@"; do
+      $debug && echo "$0[$channel]: option: $opt" 1>&2
+      case "$opt" in
+        "url="*)
+          url="$(echo $opt | sed -e 's/^url=//')"
+          ;;
+        "camera_room="*)
+          camera_room="$(echo $opt | sed -e 's/^camera_room=//')"
+          ;;
+        "direct="*)
+          direct="$(echo $opt | sed -e 's/^direct=//')"
+          ;;
+        "browser="*)
+          browser="$(echo $opt | sed -e 's/^browser=//')"
+          ;;
+      esac
+    done
+  fi
+}
+
+max_width=$(echo "$camera_default_max_resolution" | cut -d "x" -f 1)
+max_height=$(echo "$camera_default_max_resolution" | cut -d "x" -f 2)
+
+. "/usr/local/etc/pult/pult-$channel.conf"
+
+$debug && echo "$0[$channel]: url = $url" 1>&2
+
+cleanup ()
+{
+  if [ -n "$(jobs -p)" ]; then
+    kill $(jobs -p)
+  fi
+}
+
+trap cleanup exit;
+
+if $browser; then
+
+  if [ -z "$url" ]; then
+    echo "$0[$channel]: configuration error: missing URL for browser" 1>&2
+    exit 1
+  fi
+
+  env python3 "$module_directory/cvh-camera.py" "$url" &
+  selenium_pid="$!"
+  line=$(xwininfo -root -children | grep "novnc\.cvh-server\.de")
+  $debug && echo "camera_room = $camera_room" 1>&2
+  while [ -z "$line" ]; do
+    sleep 0.1
+    line=$(xwininfo -root -children | grep "Camera Receiver $camera_room")
+  done
+  windowid=$(echo $line | cut -d " " -f 1)
+  chromium_pid=$(xdotool getwindowpid "$windowid")
+  $debug && echo "$0[$channel]: chromium_pid = $chromium_pid" 1>&2
+  rm -rf "$pid_file"
+  echo "$chromium_pid" > "$pid_file"
+  if wait "$selenium_pid"; then
+    report_status "running" "$windowid" "$max_width" "$max_height"
+  else
+    $debug && echo "start of $module_name interrupted" 1>&2
+  fi
+
+elif $direct; then
+
+  report_status "running" "NULL" "$max_width" "$max_height"
+
+else
+
+  echo "$0[$channel]: configuration error: neither browser nor direct" 1>&2
+  exit 1
+
+fi

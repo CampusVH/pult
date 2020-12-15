@@ -1,0 +1,122 @@
+#!/bin/bash
+
+debug=true
+
+module_name="$1"
+channel="$2"
+
+. "/usr/local/etc/pult/pult.conf"
+. "/usr/local/lib/pult/pult.functions"
+
+module ()
+{
+  m="$1"
+  shift 2
+  if [ "$m" = "$module_name" ]; then
+    for opt in "$@"; do
+      $debug && echo "$0[$channel]: option: $opt" 1>&2
+      case "$opt" in
+        "listen="*)
+          listen=$(echo "$opt" | sed -e 's/^listen=//')
+          ;;
+      esac
+    done
+  fi
+}
+
+listen="$channel"
+
+. "/usr/local/etc/pult/pult-$channel.conf"
+
+$debug && echo "$0[$channel]: listen = $listen" 1>&2
+
+pid_file="$run_directory/$module_name-$channel.pid"
+$debug && echo "$0[$channel]: pid_file = $pid_file" 1>&2
+
+shopt -s lastpipe
+
+while true; do
+  unset resolution
+  report_status "listening"
+  $debug && echo "ssvncviewer -listen $listen -viewonly" 1>&2
+  ssvncviewer -listen "$listen" -viewonly 2>&1 \
+    | while read line; do \
+        if [ ! -f "$pid_file" ]; then
+          daemon_pid="$$"
+          echo "$daemon_pid" > "$pid_file"
+          pgrep -P "$daemon_pid" >> "$pid_file"
+        fi
+        resolution=$(echo "$line" | grep "created.*image" \
+                                  | grep -o " *[0-9x]* *$")
+        if [ -n "$resolution" ]; then
+          $debug && echo -e "$0[$channel]: line = \"$line\""
+          width=$(echo "$resolution" | cut -d "x" -f 1)
+          height=$(echo "$resolution" | cut -d "x" -f 2)
+#          if [ "$width" -gt "$((2 * height))" ]; then
+#            width=$((height * 16 / 9 + 4))
+#            height=$((height + 24))
+#          fi
+          line=$(xwininfo -root -children | grep "ssvnc")
+          windowid=$(echo "$line" | awk '{ print $1; }')
+          xdotool set_window --name "Controlled by PULT" "$windowid"
+          report_status "running" "$windowid" "$width" "$height"
+        fi
+      done
+  sleep 1
+  if [ -f "$pid_file" ]; then
+    $debug && echo "$0[$channel]: pids: " $(tail -n +1 $pid_file) 1>&2
+    for vncviewer_pid in $(tail -n +1 "$pid_file"); do
+      $debug && echo kill $(pgrep -P "$vncviewer_pid") 1>&2
+      kill $(pgrep -P "$vncviewer_pid")
+      $debug && echo kill "$vncviewer_pid" 1>&2
+      kill "$vncviewer_pid"
+    done
+    rm -rf "$pid_file"
+    sleep 1
+  fi
+done
+
+# for xtigervncviewer
+#
+# vncviewer="/usr/bin/xtigervncviewer"
+# vncviewer_opts="-viewonly"
+#
+# cleanup ()
+# {
+#   if [ -n "$(jobs -p)" ]; then
+#     kill $(jobs -p)
+#   fi
+# }
+#
+# pid_file="$run_directory/$module_name-$channel.pid"
+# $debug && echo "$0[$channel]: pid_file = $pid_file" 1>&2
+#
+trap cleanup exit;
+#
+#  (ltrace -e XCreatePixmap "$vncviewer" $vncviewer_opts -listen "$port" 2>&1 & echo "ltrace_pid: $!") \
+#    | while read line; do \
+#        if [ -z "$ltrace_pid" ]; then
+#          ltrace_pid=$(echo "$line" | grep "^ltrace_pid: " | cut -d " " -f 2)
+#          $debug && echo "$0[$channel]: ltrace_pid = $ltrace_pid" 1>&2
+#          if [ -n "$ltrace_pid" ]; then
+#            echo "$ltrace_pid" >> "$pid_file"
+#            vnc_pid=$(pgrep -P "$ltrace_pid")
+#            $debug && echo "$0[$channel]: vnc_pid = $vnc_pid" 1>&2
+#            if [ -n "$vnc_pid" ]; then
+#              echo "$vnc_pid" >> "$pid_file"
+#            fi
+#          fi
+#        fi
+#        if [ -z "$resolution" ]; then
+#          resolution=$(echo "$line" | grep "XCreatePixmap" | cut -d "," -f 3-4)
+#          if [ -n "$resolution" ]; then
+#            width=$(echo "$resolution" | cut -d "," -f 1)
+#            height=$(echo "$resolution" | cut -d "," -f 2 | cut -d ")" -f 1)
+#            line=$(xwininfo -root -children | grep "TigerVNC")
+#            windowid=$(echo $line | cut -d " " -f 1)
+#            $debug && echo "$0[$channel]: line = $line" 1>&2
+#            $debug && echo "$0[$channel]: windowid = $windowid" 1>&2
+#            report_status "running" $windowid $width $height
+#          fi
+#        fi
+#      done

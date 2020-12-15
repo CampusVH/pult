@@ -1,0 +1,83 @@
+#!/bin/bash
+
+debug=true
+
+module_name="$PULT_MODULE_NAME"
+channel="$PULT_CHANNEL"
+$debug && echo "$0[$channel]: $module_name $@" 1>&2
+
+camera_room="$((1000 + channel))"
+camera_server_port="$((5010 + channel))"
+
+. "/usr/local/etc/pult/pult.conf"
+
+direct=false
+
+module ()
+{
+  m="$1"
+  shift 2
+  if [ "$m" = "$module_name" ]; then
+    for opt in "$@"; do
+      $debug && echo "$0[$channel]: option: $opt" 1>&2
+      case "$opt" in
+        "camera_room="*)
+          camera_room="$(echo $opt | sed -e 's/^camera_room=//')"
+          ;;
+        "camera_server_port="*)
+          camera_server_port="$(echo $opt | sed -e 's/^camera_server_port=//')"
+          ;;
+        "direct="*)
+          direct="$(echo $opt | sed -e 's/^direct=//')"
+      esac
+    done
+  fi
+}
+
+. "/usr/local/etc/pult/pult-$channel.conf"
+$debug && echo "$0[$channel]: camera_room = $camera_room, camera_server_port = $camera_server_port" 1>&2
+
+pid_file="$run_directory/$module_name-$channel.pid"
+$debug && echo "$0[$channel]: pid_file = $pid_file" 1>&2
+
+cmd="$1"
+case "$cmd" in
+  start)
+    daemon="$(echo $0 | sed -e 's/\.module/.daemon/')"
+    "$daemon" "$module_name" "$channel" &
+    ;;
+  stop)
+    if $direct; then
+      $debug && echo "$0[$channel]: sending command to camera server: hide" 1>&2
+      echo "hide" | nc -q 0 localhost "$camera_server_port"
+    fi
+    if [ -f "$pid_file" ]; then
+      pid=$(cat "$pid_file")
+      ppid=$(ps --no-headers -o "%P" "$pid")
+      kill "$pid" "$ppid" || true
+      rm -rf "$pid_file"
+    else
+      echo -e "$0[$channel]: stop: not running"
+    fi
+    ;;
+  defaults)
+    echo "min=true browser=true direct=false"
+    ;;
+  geometry)
+    $debug && echo "new geometry: ${2}x${3}+$4+$5" 1>&2
+    if $direct; then
+      if [ "$2" = "hidden" ]; then
+        $debug && echo "$0[$channel]: sending command to camera server: hide" 1>&2
+        echo "hide" | nc -q 0 localhost "$camera_server_port"
+      else
+        $debug && echo "$0[$channel]: sending command to camera server: show" 1>&2
+        echo "show" | nc -q 0 localhost "$camera_server_port"
+        $debug && echo "$0[$channel]: sending command to camera server: set_geometry_relative_to_canvas lt $4 $5 $2 $3" 1>&2
+        echo "set_geometry_relative_to_canvas lt $4 $5 $2 $3" | nc -q 0 localhost "$camera_server_port"
+      fi
+    fi
+    ;;
+  *)
+    echo -e "$0[$channel]: invalid command\"$@\""
+    ;;
+esac

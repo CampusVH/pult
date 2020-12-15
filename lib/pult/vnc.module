@@ -1,0 +1,44 @@
+#!/bin/bash
+
+debug=true
+
+module_name="$PULT_MODULE_NAME"
+channel="$PULT_CHANNEL"
+$debug && echo "$0[$channel]: $module_name $@" 1>&2
+
+. "/usr/local/etc/pult/pult.conf"
+
+pid_file="$run_directory/$module_name-$channel.pid"
+$debug && echo "$0[$channel]: pid_file = $pid_file" 1>&2
+
+cmd="$1"
+case "$cmd" in
+  start)
+    rm -rf "$pid_file"
+    daemon="$(echo $0 | sed -e 's/\.module/.daemon/')"
+    "$daemon" "$module_name" "$channel" &
+    ;;
+  stop)
+    if [ -f "$pid_file" ]; then
+      $debug && echo "$0[$channel]: pids: " $(tac "$pid_file") 1>&2
+      for pid in $(tac "$pid_file"); do
+        $debug && echo kill $(pgrep -P "$pid") 1>&2
+        kill $(pgrep -P "$pid")
+        $debug && echo kill "$pid" 1>&2
+        kill "$pid"
+      done
+      rm -rf "$pid_file"
+    else
+      echo -e "$0[$channel]: stop: not running"
+    fi
+    ;;
+  defaults)
+    echo "min=false"
+    ;;
+  geometry)
+    $debug && echo "new geometry: ${2}x${3}+$4+$5" 1>&2
+    ;;
+  *)
+    echo -e "$0[$channel]: invalid command\"$@\""
+    ;;
+esac

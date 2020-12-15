@@ -1,0 +1,12 @@
+body
+{
+  font-family: sans-serif;
+  max-width: 40em;
+  margin: 0px auto;
+}
+
+img.logo
+{
+  margin-left: 2em;
+  margin-bottom: 2em;
+}

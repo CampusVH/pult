@@ -1,0 +1,12 @@
+[Unit]
+Description = VNC server %i
+After = syslog.target network.target
+
+[Service]
+Type = forking
+User = pult
+ExecStart = /usr/local/sbin/vncserver start %i
+ExecStop = /usr/local/sbin/vncserver stop %i
+
+[Install]
+WantedBy = multi-user.target

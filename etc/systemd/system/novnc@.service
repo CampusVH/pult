@@ -1,0 +1,11 @@
+[Unit]
+Description = noVNC service %i
+After=syslog.target network.target
+
+[Service]
+Type = simple
+User = novnc
+ExecStart = /usr/local/sbin/novnc %i
+
+[Install]
+WantedBy = multi-user.target

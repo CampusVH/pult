@@ -1,0 +1,12 @@
+#!/bin/dash
+
+import_channel="$1"
+export_channel="$((import_channel + 10))"
+export_vnc_port="$((export_channel + 5900))"
+channel_home="$HOME/vnc$import_channel"
+scale="1/2"
+
+DISPLAY=:"$import_channel" HOME="$channel_home" \
+  x11vnc -passwdfile "$channel_home/.vnc/passwdfile" \
+         -shared -forever -xrandr -localhost \
+         -scale "$scale" -rfbport "$export_vnc_port"

@@ -1,0 +1,47 @@
+room-1001: {
+	description = "VNC 1 Camera"
+	publishers = 1
+	bitrate = 128000
+	fir_freq = 10
+	record = false
+}
+
+room-1002: {
+	description = "VNC 2 Camera"
+	publishers = 1
+	bitrate = 128000
+	fir_freq = 10
+	record = false
+}
+
+room-1003: {
+	description = "VNC 3 Camera"
+	publishers = 1
+	bitrate = 128000
+	fir_freq = 10
+	record = false
+}
+
+room-1004: {
+	description = "VNC 4 Camera"
+	publishers = 1
+	bitrate = 128000
+	fir_freq = 10
+	record = false
+}
+
+room-1005: {
+	description = "VNC 5 Camera"
+	publishers = 1
+	bitrate = 128000
+	fir_freq = 10
+	record = false
+}
+
+room-1006: {
+	description = "VNC 6 Camera"
+	publishers = 1
+	bitrate = 128000
+	fir_freq = 10
+	record = false
+}

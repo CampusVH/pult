@@ -1,0 +1,11 @@
+[Unit]
+Description = CVH Camera %i
+After = syslog.target network.target janus.target
+
+[Service]
+Type = simple
+User = pult
+ExecStart = /usr/local/sbin/cvh-camera %i
+
+[Install]
+WantedBy = multi-user.target

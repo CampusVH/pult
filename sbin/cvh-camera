@@ -1,0 +1,16 @@
+#!/bin/bash
+
+channel="$1"
+
+server_port="$((5000 + channel))"
+pult_port="$((5010 + channel))"
+
+export NODE_PATH="/usr/lib/node_modules"
+export PORT="$server_port"
+
+(
+  echo "hide"
+  while true; do
+    nc.openbsd -l "$pult_port"
+  done
+) | node /usr/local/sbin/cvh-camera-server.js

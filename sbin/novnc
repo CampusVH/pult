@@ -1,0 +1,11 @@
+#!/bin/bash
+
+channel="$1"
+shift
+
+launch="/usr/share/novnc/utils/launch.sh"
+websocket_port="$((6080 + channel))"
+vnc_server="localhost"
+vnc_port="$((5900 + channel))"
+
+exec "$launch" --listen "$websocket_port" --vnc "$vnc_server:$vnc_port" "$@"

@@ -1,0 +1,383 @@
+#!/bin/bash
+
+debug=true
+
+channel="$1"
+background_pattern="Xpdf:.*vnc-testbild\.pdf"
+lock_file="/usr/local/var/run/pult/pultd-$channel.lock"
+status_file="/usr/local/var/run/pult/pult-status-$channel"
+
+. "/usr/local/etc/pult/pult.conf"
+. "/usr/local/lib/pult/pult.functions"
+
+export HOME="$HOME/vnc$channel"
+$debug && echo "$0[$channel]: HOME = $HOME" 1>&2
+
+export DISPLAY=":$channel"
+$debug && echo "$0[$channel]: DISPLAY = $DISPLAY" 1>&2
+
+declare -A module_driver
+declare -A module_status
+declare -A module_min
+declare -A module_min_geometry
+declare -A module_wid
+declare -A module_w
+declare -A module_h
+
+invoke_module ()
+{
+  local m="$1"
+  shift
+  $debug && echo "executing command $* for module $m" 1>&2
+  local driver="$module_directory/${module_driver[$m]}.module"
+  if [ -x "$driver" ]; then
+    export PULT_MODULE_NAME="$m"
+    export PULT_CHANNEL="$channel"
+    "$driver" "$@"
+  else
+    echo -e "module driver \"$driver\" not found"
+  fi
+}
+
+cleanup ()
+{
+  $debug && echo "cleaning up modules" 1>&2
+  for mm in "${!module_driver[@]}"; do
+    invoke_module "$mm" stop
+  done
+  for wid in "${module_wid[@]}"; do
+    xkill -id "$wid"
+  done
+  switch_to_resolution "$default_resolution"
+}
+
+trap cleanup exit;
+
+module ()
+{
+  local m="$1"
+  local d="$2"
+  shift 2
+  module_driver["$m"]="$d"
+  module_status["$m"]=""
+  module_min["$m"]="false"
+  module_min_geometry["$m"]=""
+  module_wid["$m"]=""
+  module_w["$m"]=""
+  module_h["$m"]=""
+  local defaults=$(invoke_module "$m" "defaults")
+  $debug && echo -e "$0[$channel]: defaults = \"$defaults\" for module $m" 1>&2
+  for opt in $defaults "$@"; do
+    case "$opt" in
+      "min="*)
+        local min
+        eval "$opt"
+        module_min["$m"]="$min"
+        ;;
+      "min_geometry="*)
+        local min_geometry
+        eval "$opt"
+        module_min_geometry["$m"]="$min_geometry"
+        ;;
+      "autostart")
+        $debug && echo "autostarting module $m" 1>&2
+        module_status["$m"]="starting"
+        invoke_module "$m" "start"
+        ;;
+    esac
+  done
+  cleanup_modules="invoke_module $m stop ; $cleanup_modules"
+}
+
+. "/usr/local/etc/pult/pult-$channel.conf"
+
+switch_to_resolution ()
+{
+  local resolution
+  if echo "$1" | grep -q "x"; then
+    resolution="$1"
+    screen_width="$(echo $resolution | cut -d "x" -f 1)"
+    screen_height="$(echo $resolution | cut -d "x" -f 2)"
+  else
+    screen_width="$1"
+    screen_height="$2"
+    resolution="${screen_width}x${screen_height}"
+  fi
+  $debug && echo "switch_to_resolution: $resolution" 1>&2
+  if xrandr | grep -q "$resolution"; then
+    $debug && echo "standard mode: $resolution" 1>&2
+  else
+    local timing=$(
+      gtf $screen_width $screen_height 60 \
+        | grep Modeline \
+        | (
+            read modeline name timing
+            echo $timing
+          )
+    )
+    $debug && echo xrandr --output VNC-0 --newmode "$resolution" $timing 1>&2
+    xrandr --output VNC-0 --newmode "$resolution" $timing
+    xrandr --addmode VNC-0 "$resolution"
+  fi
+  xrandr --output VNC-0 --mode "$resolution" 2>&1
+  xdotool mousemove $((screen_width - 1)) $((screen_height / 2))
+}
+
+switch_to_geometry ()
+{
+  local mm="$1"
+  local wid="$2"
+  local w="$3"
+  local h="$4"
+  local x="$5"
+  local y="$6"
+  if [ "$wid" != "NULL" ]; then
+    $debug && echo xdotool windowmove "$wid" "$x" "$y" windowsize "$wid" "$w" "$h" windowraise "$wid" 1>&2
+    xdotool windowmove "$wid" "$x" "$y" windowsize "$wid" "$w" "$h" windowraise "$wid"
+  else
+    $debug && echo "module $mm: no window id" 2>&2
+  fi
+  invoke_module "$mm" "geometry" "$w" "$h" "$x" "$y"
+}
+
+position_min_module ()
+{
+  local mm="$1"
+  local wid=${module_wid["$mm"]}
+  local geometry=${module_min_geometry["$mm"]}
+  if [ -z "$geometry" ]; then
+    geometry="480x360-0-0"
+  fi
+  $debug && echo "geometry[$m] = $geometry" 1>&2
+  local min_width=$(echo "$geometry" | cut -d "x" -f 1)
+  local min_height=$(echo "$geometry" | cut -d "x" -f 2 | sed -e 's/[-+].*$//')
+  local new_pos=$(echo "$geometry" | sed -e 's/^[0-9x]*//')
+  local new_pos_x=$(echo "$new_pos" | egrep -o '^[-+]+[0-9]+')
+  local new_pos_x_sign=$(echo "$new_pos_x" | cut -b 1)
+  new_pos_x=$(echo "$new_pos_x" | cut -b 2-)
+  if [ "$new_pos_x_sign" = "-" ]; then
+    new_pos_x=$((screen_width - min_width - new_pos_x))
+  fi
+  local new_pos_y=$(echo "$new_pos" | egrep -o '[-+]+[0-9]+$')
+  local new_pos_y_sign=$(echo "$new_pos_y" | cut -b 1)
+  new_pos_y=$(echo "$new_pos_y" | cut -b 2-)
+  if [ "$new_pos_y_sign" = "-" ]; then
+    new_pos_y=$((screen_height - min_height - new_pos_y))
+  fi
+  switch_to_geometry "$mm" "$wid" "$min_width" "$min_height" "$new_pos_x" "$new_pos_y"
+}
+
+position_all_min_modules_except ()
+{
+  local exception="$1"
+  local mm
+  for mm in "${!module_min[@]}"; do
+    $debug && echo -e "$0: running 1: mm = $mm, min = ${module_min[$mm]}, status = ${module_status[$mm]}" 1>&2
+    if [ "$mm" != "$exception" ] && [ "$mm" != "$primary_module" ] && ${module_min["$mm"]} && [ "${module_status[$mm]}" = "running" ]; then
+      position_min_module "$mm"
+    fi
+  done
+}
+
+position_all_min_modules ()
+{
+  position_all_min_modules_except ""
+}
+
+position_primary_module ()
+{
+  if [ -n "$primary_module" ]; then
+    local wid=${module_wid["$primary_module"]}
+    local w=${module_w["$primary_module"]}
+    local h=${module_h["$primary_module"]}
+    $debug && echo -e "$0: wid = $wid, w = $w, h = $h" 1>&2
+    switch_to_resolution "$w" "$h"
+    switch_to_geometry "$primary_module" "$wid" "$screen_width" "$screen_height" "0" "0"
+  fi
+}
+
+find_new_primary_module ()
+{
+  if [ -z "$primary_module" ] || ! [ "${module_status[$primary_module]}" = "running" ]; then
+    for mm in "${!module_min[@]}"; do
+      $debug && echo -e "$0: find_new_primary_module 1: mm = $mm, min = ${module_min[$mm]}, status = ${module_status[$mm]}" 1>&2
+      if ! ${module_min["$mm"]} && [ "${module_status[$mm]}" = "running" ]; then
+        primary_module="$mm"
+      fi
+    done
+  fi
+  if [ -z "$primary_module" ] || ! [ "${module_status[$primary_module]}" = "running" ]; then
+    for mm in "${!module_min[@]}"; do
+      $debug && echo -e "$0: find_new_primary_module 2: mm = $mm, min = ${module_min[$mm]}, status = ${module_status[$mm]}" 1>&2
+      if [ "${module_status[$mm]}" = "running" ]; then
+        primary_module="$mm"
+      fi
+    done
+  fi
+  if [ -z "$primary_module" ] || ! [ "${module_status[$primary_module]}" = "running" ]; then
+    $debug && echo -e "$0: no primary_module; switching to default resolution" 1>&2
+    switch_to_resolution "$default_resolution"
+  else
+    $debug && echo -e "$0: new primary_module: $primary_module" 1>&2
+    position_primary_module
+    position_all_min_modules
+  fi
+}
+
+update_pult_status ()
+{
+  rm "$status_file"
+  local mm
+  for mm in "${!module_status[@]}"; do
+    echo -e "module_status[$mm]=\"${module_status[$mm]}\"" >> "$status_file"
+  done
+}
+
+shopt -s lastpipe
+
+update_pult_status
+background_wid=$(xwininfo -root -children | grep "$background_pattern" | awk '{ print $1; }')
+xdotool set_window --name "Controlled by PULT" "$background_wid"
+
+while true; do
+  nc.openbsd -q 0 -w 10 -l "$pultd_port" | \
+    while read -ra cmd; do
+      m="${cmd[0]}"
+      $debug && echo -e "$0: command = \"${cmd[*]}\"" 1>&2
+      $debug && echo -e "$0: module_driver = \"${module_driver[*]}\"" 1>&2
+      if [ -n "${module_driver[$m]}" ]; then
+        c="${cmd[1]}"
+        if [ "$c" = "status" ]; then
+          touch "$lock_file"
+          s="${cmd[2]}"
+          $debug && echo -e "$0: module $m reported status \"$s\", wid = ${cmd[3]}, w = ${cmd[4]}, h = ${cmd[5]}" 1>&2
+          module_status["$m"]="$s"
+          if [ "$s" = "waiting" ]; then
+            $debug && echo "$0: background_wid = $background_wid" 1>&2
+            xdotool windowraise "$background_wid"
+            position_primary_module
+            position_all_min_modules
+          elif [ "$s" = "listening" ]; then
+            $debug && echo -e "$0: $m: listening, primary_module = $primary_module" 1>&2
+            if [ "$primary_module" = "$m" ]; then
+              primary_module=""
+              find_new_primary_module
+            fi
+          elif [ "$s" = "running" ]; then
+            wid="${cmd[3]}"
+            w="${cmd[4]}"
+            h="${cmd[5]}"
+            $debug && echo -e "$0: wid = $wid, w = $w, h = $h" 1>&2
+            module_wid["$m"]="$wid"
+            module_w["$m"]="$w"
+            module_h["$m"]="$h"
+            if ! ${module_min["$m"]} || [ -z "$primary_module" ] || ${module_min["$primary_module"]}; then
+              $debug && echo -n "min[m] = ${module_min["$m"]}, p = $primary_module" 1>&2
+              if [ -n "$primary_module" ]; then
+                $debug && echo -n ", min[p] = ${module_min[$primary_module]}" 1>&2
+              fi
+              $debug && echo 1>&2
+              primary_module="$m"
+            fi
+            $debug && echo -e "$0: primary_module = $primary_module" 1>&2
+            position_primary_module
+            position_all_min_modules
+          fi
+          update_pult_status
+          rm "$lock_file"
+        elif [ "$c" = "min" ]; then
+          if [ "${module_status[$m]}" = "hidden" ]; then
+            module_status["$m"]="running"
+          fi
+          if [ "${module_status[$m]}" = "running" ]; then
+            if "${module_min[$m]}"; then
+              $debug && echo "$0: minimising module $m"
+              if [ "$m" = "$primary_module" ]; then
+                for mm in "${!module_min[@]}"; do
+                  $debug && echo -e "$0: minimising 1: mm = $mm, min = ${module_min[$mm]}, status = ${module_status[$mm]}" 1>&2
+                  if [ "$mm" != "$m" ] && ! ${module_min["$mm"]} && [ "${module_status[$mm]}" = "running" ]; then
+                    primary_module="$mm"
+                  fi
+                done
+              fi
+              if [ "$m" = "$primary_module" ]; then
+                primary_module=""
+                switch_to_resolution "$default_resolution"
+              else
+                $debug && echo -e "$0: primary_module = $primary_module" 1>&2
+                position_primary_module
+              fi
+              position_all_min_modules_except "$m"
+              $debug && echo -e "$0: minimising 3: m = $m, min = ${module_min[$m]}, status = ${module_status[$m]}" 1>&2
+              position_min_module "$m"
+            else
+              echo "$0: trying to minimise module $m, which is not minimiseable"
+            fi
+          else
+            echo -e "$0: not minimising module $m: status \"${module_status[$m]}\""
+          fi
+        elif [ "$c" = "max" ]; then
+          if [ "${module_status[$m]}" = "hidden" ]; then
+            module_status["$m"]="running"
+          fi
+          if [ "${module_status[$m]}" = "running" ]; then
+            $debug && echo "$0: maximising module $m"
+            primary_module="$m"
+            $debug && echo -e "$0: primary_module = $primary_module" 1>&2
+            position_primary_module
+            position_all_min_modules
+          else
+            echo -e "$0: not maximising module $m: status \"${module_status[$m]}\""
+          fi
+        elif [ "$c" = "hide" ]; then
+          if [ "${module_status[$m]}" = "running" ]; then
+            $debug && echo "$0: hiding module $m"
+            $debug && echo "$0: background_wid = $background_wid" 1>&2
+            module_status["$m"]="hidden"
+            if [ "$primary_module" = "$m" ]; then
+              primary_module=""
+              find_new_primary_module
+            fi
+            xdotool windowraise "$background_wid"
+            position_primary_module
+            position_all_min_modules
+            invoke_module "$m" "geometry" "hidden"
+          else
+            echo -e "$0: not hiding module $m: status \"${module_status[$m]}\""
+          fi
+        elif [ "$c" = "start" ]; then
+          touch "$lock_file"
+          if [ -n "${module_status[$m]}" ]; then
+            echo -e "$0: not starting module $m: already status \"${module_status[$m]}\""
+          else
+            $debug && echo -e "$0: starting module $m" 1>&2
+            module_status["$m"]="starting"
+            update_pult_status
+            invoke_module "$m" "start"
+          fi
+          rm "$lock_file"
+        elif [ "$c" = "stop" ]; then
+          touch "$lock_file"
+          invoke_module "$m" "stop"
+          wid="${module_wid[$m]}"
+          if [ -n "$wid" -a "$wid" != "NULL" ]; then
+            xkill -id "$wid" || true
+          fi
+          module_status["$m"]=""
+          if [ "$primary_module" = "$m" ]; then
+            primary_module=""
+            find_new_primary_module
+          else
+            $debug && echo "$0: keeping primary module $primary_module"
+          fi
+          update_pult_status
+          rm "$lock_file"
+        else
+          $debug && echo -e "$0: module-specific command \"$c\"" 1>&2
+          invoke_module "$m" "$c"
+        fi
+      else
+        echo -e "$0: invalid command \"${cmd[*]}\""
+      fi
+    done
+done

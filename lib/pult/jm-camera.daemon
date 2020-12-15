@@ -1,0 +1,65 @@
+#!/bin/bash
+
+debug=true
+
+module_name="$1"
+channel="$2"
+
+. "/usr/local/etc/pult/pult.conf"
+. "/usr/local/lib/pult/pult.functions"
+
+pid_file="$run_directory/$module_name-$channel.pid"
+$debug && echo "$0[$channel]: pid_file = $pid_file" 1>&2
+
+module ()
+{
+  m="$1"
+  shift 2
+  if [ "$m" = "$module_name" ]; then
+    for opt in "$@"; do
+      $debug && echo "$0[$channel]: option: $opt" 1>&2
+      case "$opt" in
+        "url="*)
+          url="$(echo $opt | sed -e 's/^url=//')"
+          ;;
+      esac
+    done
+  fi
+}
+
+max_width=$(echo "$camera_default_max_resolution" | cut -d "x" -f 1)
+max_height=$(echo "$camera_default_max_resolution" | cut -d "x" -f 2)
+
+. "/usr/local/etc/pult/pult-$channel.conf"
+
+$debug && echo "$0[$channel]: url = $url" 1>&2
+
+cleanup ()
+{
+  if [ -n "$(jobs -p)" ]; then
+    kill $(jobs -p)
+  fi
+}
+
+trap cleanup exit;
+
+if [ -z "$url" ]; then
+  echo "$0[$channel]: configuration error: missing URL" 1>&2
+  exit 1
+fi
+
+env python3 "$module_directory/jm-camera.py" "$url" &
+selenium_pid="$!"
+line=$(xwininfo -root -children | grep "Jitsi Meet")
+while [ -z "$line" ]; do
+  sleep 0.1
+  line=$(xwininfo -root -children | grep "Jitsi Meet")
+done
+windowid=$(echo $line | cut -d " " -f 1)
+xdotool set_window --name "Controlled by PULT" "$windowid"
+report_status "running" "$windowid" "$max_width" "$max_height"
+browser_pid=$(xdotool getwindowpid "$windowid")
+$debug && echo "$0[$channel]: browser_pid = $browser_pid" 1>&2
+rm -rf "$pid_file"
+echo "$browser_pid" > "$pid_file"
+wait "$selenium_pid"

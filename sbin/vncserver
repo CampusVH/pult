@@ -1,0 +1,15 @@
+#!/bin/dash
+
+channel="$2"
+vncserver="/usr/bin/tigervncserver"
+vncserver_options="-depth 24 -geometry 1920x1080"
+channel_home="$HOME/vnc$channel"
+
+case "$1" in
+  start)
+    HOME="$channel_home" "$vncserver" :"$channel" $vncserver_options
+    ;;
+  stop)
+    HOME="$channel_home" "$vncserver" :"$channel" -kill
+    ;;
+esac

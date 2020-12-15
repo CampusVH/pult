@@ -1,0 +1,11 @@
+[Unit]
+Description = VNC repeater %i
+After = syslog.target network.target vncserver@%i.target
+
+[Service]
+Type = simple
+User = pult
+ExecStart = /usr/local/sbin/vncrepeater %i
+
+[Install]
+WantedBy = multi-user.target

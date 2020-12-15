@@ -1,0 +1,71 @@
+body.text
+{
+  font-family: sans-serif;
+  max-width: 40em;
+  margin: 0px auto;
+}
+
+body.panel
+{
+  font-family: sans-serif;
+  margin-left: 1em;
+}
+
+img.logo
+{
+  margin-left: 2em;
+  margin-bottom: 2em;
+}
+
+.upload
+{
+  font-size: small;
+}
+
+button.channel
+{
+  min-width: 6em;
+  height: 2.7em;
+  font-size: small;
+  text-align: center;
+}
+
+table
+{
+  border-spacing: 1em 0em;
+}
+
+td
+{
+  padding: 0px;
+  text-align: center;
+}
+
+.module_name
+{
+  height: 2.7em;
+  padding-top: 0.5em;
+  text-align: right;
+  vertical-align: middle;
+  font-size: medium;
+  font-weight: bold;
+}
+
+.module_transient
+{
+  padding-right: 0.5em;
+  border-right: 0.5em solid orange;
+}
+
+.module_stopped
+{
+  padding-right: 0.5em;
+  border-right: 0.5em solid #cfcfcf;
+}
+
+.module_running
+{
+  padding-right: 0.5em;
+  border-right: 0.5em solid green;
+}
+

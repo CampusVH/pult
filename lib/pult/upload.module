@@ -1,0 +1,143 @@
+#!/bin/bash
+
+debug=true
+
+module_name="$PULT_MODULE_NAME"
+channel="$PULT_CHANNEL"
+$debug && echo "$0[$channel]: $module_name $@" 1>&2
+
+max_width="1920"
+max_height="1080"
+module_daemon_port="$((6100 + channel))"
+
+. "/usr/local/etc/pult/pult.conf"
+. "/usr/local/lib/pult/pult.functions"
+
+pid_file="$run_directory/upload-$channel.pid"
+$debug && echo "$0[$channel]: pid = $pid_file" 1>&2
+config_file="$run_directory/upload-$channel.pl"
+$debug && echo "$0[$channel]: config_file = $config_file" 1>&2
+
+upload_dir="/usr/local/var/spool/pult"
+www_dir="/var/www/streaming"
+download_dir="/pult-upload"
+filename="pult-uploaded-$channel.tmp"
+b64_filename="pult-uploaded-$channel.b64"
+lock_filename="pult-uploaded-$channel.lock"
+pointer_filename="pult/pointer.png"
+error_filename="pult-uploaded-$channel.err"
+img_title="$module_name Image Viewer"
+
+cmd="$1"
+case "$cmd" in
+  start)
+    rm -rf "$pid_file" "$config_file" "$upload_dir/$filename" "$upload_dir/$error_filename" "$www_dir$download_dir/$filename"
+    touch "$config_file"
+    echo -e "\$pultd_port = $pultd_port;" >> "$config_file"
+    echo -e "\$module_name = \"$module_name\";" >> "$config_file"
+    echo -e "\$upload_dir = \"$upload_dir\";" >> "$config_file"
+    echo -e "\$web_dir = \"$web_dir\";" >> "$config_file"
+    echo -e "\$download_dir = \"$download_dir\";" >> "$config_file"
+    echo -e "\$filename = \"$filename\";" >> "$config_file"
+    echo -e "\$lock_filename = \"$lock_filename\";" >> "$config_file"
+    echo -e "\$error_filename = \"$error_filename\";" >> "$config_file"
+    daemon="$(echo $0 | sed -e 's/\.module/.daemon/')"
+    websockify_pid=$(ps aux | grep "websockify $module_daemon_port" | grep -v "grep" | awk '{ print $2; }')
+    if [ -n "$websockify_pid" ]; then
+      echo -e "$0[$channel]: Stale websockify, pid = $websockify_pid. Trying to kill it ..."
+      kill "$websockify_pid"
+      sleep 1
+      echo -e "$0[$channel]: ... okay, let's hope."
+    fi
+    echo websockify "$module_daemon_port" -- "$daemon" "$module_name" "$channel" \
+                    "$module_daemon_port" "$img_title" \
+                    "$www_dir/$pointer_filename" \
+                    "$upload_dir/$b64_filename" "$upload_dir/$lock_filename" \
+                    "$upload_dir/$filename"
+    websockify "$module_daemon_port" -- "$daemon" "$module_name" "$channel" \
+               "$module_daemon_port" "$img_title" \
+               "$www_dir/$pointer_filename" \
+               "$upload_dir/$b64_filename" "$upload_dir/$lock_filename" \
+               "$upload_dir/$filename" &
+    websockify_pid="$!"
+    echo "$websockify_pid" >> "$pid_file"
+    while [ -z "$(ps -o pid,ppid -ax | grep $websockify_pid\$)" ]; do
+      sleep 0.1
+    done
+    ps -o pid,ppid -ax | grep "$websockify_pid\$" | cut -d " " -f 1 >> "$pid_file"
+    (sleep 0.1; report_status "listening") &
+    ;;
+  stop)
+    if [ -f "$pid_file" ]; then
+      kill $(cat "$pid_file") || true
+      rm -rf "$pid_file"
+    fi
+    if [ -f "$config_file" ]; then
+      rm -rf "$config_file"
+    else
+      echo -e "$0[$channel]: stop: not running"
+    fi
+    rm -rf "$upload_dir/$filename" "$upload_dir/$error_filename" "$www_dir$download_dir/$filename"
+    ;;
+  defaults)
+    echo "min=false"
+    ;;
+  geometry)
+    $debug && echo "new geometry: ${2}x${3}+$4+$5" 1>&2
+    ;;
+  show-image)
+    image_file="$upload_dir/$filename"
+    rm -rf "$upload_dir/$error_filename"
+    if [ -f "$image_file" ]; then
+      echo -e "$0[$channel]: processing file \"$filename\""
+      image_identify=$(identify "$image_file")
+      image_format=$(echo "$image_identify" | head -1 | cut -d " " -f 2)
+      case "$image_format" in
+        "PNG"|"JPEG"|"GIF")
+          image_size=$(echo "$image_identify" | cut -d " " -f 3)
+          image_width=$(echo "$image_size" | cut -d "x" -f 1)
+          image_height=$(echo "$image_size" | cut -d "x" -f 2)
+          if [ "$image_width" -le "$max_width" ] && [ "$image_height" -le "$max_height" ]; then
+            true
+          else
+            convert -geometry "$max_width"x"$max_height" "$image_file" "$image_file"
+          fi
+          mv "$image_file" "$www_dir$download_dir/"
+          image_file="$www_dir$download_dir/$filename"
+          display -title "$img_title" -geometry +0+0 -borderwidth 0 "$image_file" &
+          line=$(xwininfo -root -children | grep "$img_title")
+          while [ -z "$line" ]; do
+            sleep 0.1
+            line=$(xwininfo -root -children | grep "$img_title")
+          done
+          windowid=$(echo $line | cut -d " " -f 1)
+          (sleep 0.1; report_status "running" "$windowid" "$image_width" "$image_height") &
+          ;;
+        *)
+          echo -e "$0[$channel]: image file \"$filename\" has invalid format \"$image_format\""
+          echo "invalid file format" > "$upload_dir/$error_filename"
+          rm -rf "$image_file"
+          ;;
+      esac
+    else
+      echo -e "$0[$channel]: image file \"$filename\" not found"
+    fi
+    ;;
+  reset)
+    echo -e "$0[$channel]: removing image files"
+    echo rm -rf "$upload_dir/$filename" "$www_dir$download_dir/$filename"
+    rm -rf "$upload_dir/$filename" "$www_dir$download_dir/$filename"
+    echo -e "$0[$channel]: closing viewer"
+    line=$(xwininfo -root -children | grep -m 1 "$img_title")
+    while [ -n "$line" ]; do
+      viewer_windowid=$(echo $line | cut -d " " -f 1)
+      xdotool windowkill $viewer_windowid
+      sleep 0.1
+      line=$(xwininfo -root -children | grep -m 1 "$img_title")
+    done
+    (sleep 0.1; report_status "listening") &
+    ;;
+  *)
+    echo -e "$0[$channel]: invalid command\"$@\""
+    ;;
+esac

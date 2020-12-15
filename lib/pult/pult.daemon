@@ -240,7 +240,7 @@ background_wid=$(xwininfo -root -children | grep "$background_pattern" | awk '{ 
 xdotool set_window --name "Controlled by PULT" "$background_wid"
 
 while true; do
-  nc.openbsd -q 0 -w 10 -l "$pultd_port" | \
+  nc.openbsd -q 0 -l "$pultd_port" | \
     while read -ra cmd; do
       m="${cmd[0]}"
       $debug && echo -e "$0: command = \"${cmd[*]}\"" 1>&2

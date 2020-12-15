@@ -22,6 +22,7 @@ pointer_windowid=""
 
 cleanup ()
 {
+  rm -rf "$b64_filename" "$lock_filename"
   if [ -n "$(jobs -p)" ]; then
     kill $(jobs -p)
   fi
@@ -31,8 +32,7 @@ trap cleanup exit;
 
 shopt -s lastpipe
 
-while true; do
-  nc.openbsd -w 10 -l "$module_daemon_port" | \
+nc.openbsd -l "$module_daemon_port" | \
   while read cmd param_x param_y; do
     echo "cmd = $cmd, param_x = $param_x, param_y = $param_y"
     if [ "$cmd" = "pointer" ]; then
@@ -73,5 +73,3 @@ while true; do
       echo "... done."
     fi
   done
-  sleep 1s
-done

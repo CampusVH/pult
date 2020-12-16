@@ -56,7 +56,7 @@ $install -o root -g root -m 644 etc/pult/* "$etc_directory/pult/"
 $install -o root -g root -m 644 etc/pult/* "$etc_directory/pult/"
 
 for file in pult pult-upload; do
-  $install -o root -g root -m 755 var/www/site/cgi-bin/"$file".cgi "$cgi_bin_directory/"
+  $install -o root -g root -m 755 www/cgi-bin/"$file".cgi "$cgi_bin_directory/"
   (
     cd "$cgi_bin_directory"
     for c in $channels; do

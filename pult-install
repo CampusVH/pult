@@ -65,13 +65,13 @@ for file in pult pult-upload; do
   )
 done
 
-$install -o root -g root -m 644 var/www/site/pult/*.png "$www_directory/pult/"
-$install -o root -g root -m 644 var/www/site/pult/stylesheets/default.css "$www_directory/pult/stylesheets/"
-$install -o root -g root -m 644 var/www/site/cvh-camera/* "$www_directory/cvh-camera/"
-$install -o root -g root -m 644 novnc/vnc.html "$novnc_directory/"
-$install -o root -g root -m 644 novnc/core/*.js "$novnc_directory/core/"
-$install -o root -g root -m 644 novnc/app/*.js "$novnc_directory/app/"
-$install -o root -g root -m 644 novnc/app/styles/*.css "$novnc_directory/app/styles/"
+$install -o root -g root -m 644 www/pult/*.png "$www_directory/pult/"
+$install -o root -g root -m 644 www/pult/stylesheets/default.css "$www_directory/pult/stylesheets/"
+$install -o root -g root -m 644 www/cvh-camera/* "$www_directory/cvh-camera/"
+$install -o root -g root -m 644 www/novnc/vnc.html "$novnc_directory/"
+$install -o root -g root -m 644 www/novnc/core/*.js "$novnc_directory/core/"
+$install -o root -g root -m 644 www/novnc/app/*.js "$novnc_directory/app/"
+$install -o root -g root -m 644 www/novnc/app/styles/*.css "$novnc_directory/app/styles/"
 $install -o root -g root -m 644 etc/systemd/system/* /etc/systemd/system/
 
 install_directory "$www_directory/pult-upload" www-data.pult 6575
@@ -83,9 +83,9 @@ cat << EOF
 Please install manually:
  - etc/nginx/sites-available/fragment.conf  in your nginx configuration
  - etc/janus/janus.plugin.videoroom.jcfg.fragment  in your janus configuration
- - var/www/site/vnc  as your VNC channel web page
+ - www/vnc  as your VNC channel web page
  - adapt cvh-camera-update-credentials to your www directory,
    and add a cron job to execute it periodically, for instance:
-   */15 * * * * $sbin_directory/cvh-camera-update-credentials
+   42 * * * * $sbin_directory/cvh-camera-update-credentials
  - activate and enable the services in /etc/systemd/system
 EOF

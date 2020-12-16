@@ -237,7 +237,6 @@ shopt -s lastpipe
 
 update_pult_status
 background_wid=$(xwininfo -root -children | grep "$background_pattern" | awk '{ print $1; }')
-xdotool set_window --name "Controlled by PULT" "$background_wid"
 
 while true; do
   nc.openbsd -q 0 -l "$pultd_port" | \

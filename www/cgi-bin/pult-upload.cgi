@@ -44,6 +44,8 @@ if ( open CONFIG, "$config_file" )
 
     if ( $channel >= 1 && $channel <= 6 && $upload_filehandle )
       {
+        system ( "echo $module_name reset | nc localhost $pultd_port >/dev/null" );
+        usleep ( 1000000 );
         open ( UPLOADFILE, ">$upload_dir/$filename" ) or die "$!";
         binmode UPLOADFILE;
         while ( <$upload_filehandle> )

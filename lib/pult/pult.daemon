@@ -93,6 +93,7 @@ module ()
 
 switch_to_resolution ()
 {
+  $debug && echo "switch_to_resolution: $*" 1>&2
   local resolution
   if echo "$1" | grep -q "x"; then
     resolution="$1"
@@ -103,8 +104,8 @@ switch_to_resolution ()
     screen_height="$2"
     resolution="${screen_width}x${screen_height}"
   fi
-  $debug && echo "switch_to_resolution: $resolution" 1>&2
-  if xrandr | grep -q "$resolution"; then
+  $debug && echo "switch_to_resolution: resolution = $resolution" 1>&2
+  if xrandr | grep -wq "$resolution"; then
     $debug && echo "standard mode: $resolution" 1>&2
   else
     local timing=$(
@@ -119,6 +120,7 @@ switch_to_resolution ()
     xrandr --output VNC-0 --newmode "$resolution" $timing
     xrandr --addmode VNC-0 "$resolution"
   fi
+  $debug && echo xrandr --output VNC-0 --mode "$resolution" 1>&2
   xrandr --output VNC-0 --mode "$resolution" 2>&1
   xdotool mousemove $((screen_width - 1)) $((screen_height / 2))
 }
@@ -148,23 +150,25 @@ position_min_module ()
   if [ -z "$geometry" ]; then
     geometry="480x360-0-0"
   fi
-  $debug && echo "geometry[$m] = $geometry" 1>&2
+  $debug && echo "position_min_module: geometry[$mm] = $geometry" 1>&2
   local min_width=$(echo "$geometry" | cut -d "x" -f 1)
   local min_height=$(echo "$geometry" | cut -d "x" -f 2 | sed -e 's/[-+].*$//')
-  local new_pos=$(echo "$geometry" | sed -e 's/^[0-9x]*//')
-  local new_pos_x=$(echo "$new_pos" | egrep -o '^[-+]+[0-9]+')
-  local new_pos_x_sign=$(echo "$new_pos_x" | cut -b 1)
-  new_pos_x=$(echo "$new_pos_x" | cut -b 2-)
-  if [ "$new_pos_x_sign" = "-" ]; then
-    new_pos_x=$((screen_width - min_width - new_pos_x))
+  if ((screen_width >= 2 * min_width)) || ((screen_height >= 2 * min_height)); then
+    local new_pos=$(echo "$geometry" | sed -e 's/^[0-9x]*//')
+    local new_pos_x=$(echo "$new_pos" | egrep -o '^[-+]+[0-9]+')
+    local new_pos_x_sign=$(echo "$new_pos_x" | cut -b 1)
+    new_pos_x=$(echo "$new_pos_x" | cut -b 2-)
+    if [ "$new_pos_x_sign" = "-" ]; then
+      new_pos_x=$((screen_width - min_width - new_pos_x))
+    fi
+    local new_pos_y=$(echo "$new_pos" | egrep -o '[-+]+[0-9]+$')
+    local new_pos_y_sign=$(echo "$new_pos_y" | cut -b 1)
+    new_pos_y=$(echo "$new_pos_y" | cut -b 2-)
+    if [ "$new_pos_y_sign" = "-" ]; then
+      new_pos_y=$((screen_height - min_height - new_pos_y))
+    fi
+    switch_to_geometry "$mm" "$wid" "$min_width" "$min_height" "$new_pos_x" "$new_pos_y"
   fi
-  local new_pos_y=$(echo "$new_pos" | egrep -o '[-+]+[0-9]+$')
-  local new_pos_y_sign=$(echo "$new_pos_y" | cut -b 1)
-  new_pos_y=$(echo "$new_pos_y" | cut -b 2-)
-  if [ "$new_pos_y_sign" = "-" ]; then
-    new_pos_y=$((screen_height - min_height - new_pos_y))
-  fi
-  switch_to_geometry "$mm" "$wid" "$min_width" "$min_height" "$new_pos_x" "$new_pos_y"
 }
 
 position_all_min_modules_except ()
@@ -237,6 +241,8 @@ shopt -s lastpipe
 
 update_pult_status
 background_wid=$(xwininfo -root -children | grep "$background_pattern" | awk '{ print $1; }')
+
+rm -rf "$lock_file"
 
 while true; do
   nc.openbsd -q 0 -l "$pultd_port" | \

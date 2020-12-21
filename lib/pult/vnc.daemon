@@ -49,17 +49,23 @@ while true; do
         resolution=$(echo "$line" | grep "created.*image" \
                                   | grep -o " *[0-9x]* *$")
         if [ -n "$resolution" ]; then
-          $debug && echo -e "$0[$channel]: line = \"$line\""
-          width=$(echo "$resolution" | cut -d "x" -f 1)
-          height=$(echo "$resolution" | cut -d "x" -f 2)
+          $debug && echo -e "$0[$channel]: line = \"$line\"" 1>&2
+          $debug && echo -e "$0[$channel]: resolution = \"$resolution\"" 1>&2
+          width=$(echo $resolution | cut -d "x" -f 1)
+          height=$(echo $resolution | cut -d "x" -f 2)
+          $debug && echo "$0[$channel]: width = $width, height = $height" 1>&2
 #          if [ "$width" -gt "$((2 * height))" ]; then
 #            width=$((height * 16 / 9 + 4))
 #            height=$((height + 24))
 #          fi
-          line=$(xwininfo -root -children | grep "ssvnc")
+          line=$(xwininfo -root -children | grep "SSVNC")
+          $debug && echo -e "$0[$channel]: line = \"$line\"" 1>&2
           windowid=$(echo "$line" | awk '{ print $1; }')
+          $debug && echo -e "$0[$channel]: windowid = \"$windowid\"" 1>&2
           xdotool set_window --name "Controlled by PULT" "$windowid"
           report_status "running" "$windowid" "$width" "$height"
+        elif echo "$line" | grep -q "VNC server closed connection"; then
+          report_status "listening"
         fi
       done
   sleep 1

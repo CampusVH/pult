@@ -31,7 +31,11 @@ img_title="$module_name Image Viewer"
 cmd="$1"
 case "$cmd" in
   start)
-    rm -rf "$pid_file" "$config_file" "$upload_dir/$filename" "$upload_dir/$error_filename" "$upload_dir/$lock_filename" "$www_dir$download_dir/$filename"
+    if [ -f "$pid_file" ]; then
+      kill $(cat "$pid_file") || true
+      rm -rf "$pid_file"
+    fi
+    rm -rf "$config_file" "$upload_dir/$filename" "$upload_dir/$error_filename" "$upload_dir/$lock_filename" "$www_dir$download_dir/$filename"
     touch "$config_file"
     echo -e "\$pultd_port = $pultd_port;" >> "$config_file"
     echo -e "\$module_name = \"$module_name\";" >> "$config_file"
@@ -61,11 +65,13 @@ case "$cmd" in
                "$upload_dir/$filename" &
     websockify_pid="$!"
     echo "$websockify_pid" >> "$pid_file"
-    while [ -z "$(ps -o pid,ppid -ax | grep $websockify_pid\$)" ]; do
+    while ps -p "$websockify_pid" > /dev/null && [ -z "$(ps -o pid,ppid -ax | grep $websockify_pid\$)" ]; do
       sleep 0.1
     done
-    ps -o pid,ppid -ax | grep "$websockify_pid\$" | cut -d " " -f 1 >> "$pid_file"
-    (sleep 0.1; report_status "listening") &
+    if ps -p "$websockify_pid" > /dev/null; then
+      ps -o pid,ppid -ax | grep "$websockify_pid\$" | cut -d " " -f 1 >> "$pid_file"
+      (sleep 0.1; report_status "listening") &
+    fi
     ;;
   stop)
     if [ -f "$pid_file" ]; then

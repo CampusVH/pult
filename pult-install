@@ -40,6 +40,7 @@ echo "Installing PULT ..."
 
 for file in \
   novnc \
+  yesvnc \
   vncrepeater \
   vncserver \
   cvh-camera \

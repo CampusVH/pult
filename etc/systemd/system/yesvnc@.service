@@ -1,0 +1,11 @@
+[Unit]
+Description = yesVNC WebSocket %i
+After=syslog.target network.target
+
+[Service]
+Type = simple
+User = novnc
+ExecStart = /usr/local/sbin/yesvnc %i
+
+[Install]
+WantedBy = multi-user.target

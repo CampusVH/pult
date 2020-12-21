@@ -58,8 +58,9 @@ nc.openbsd -l "$module_daemon_port" | \
         echo "... done."
       fi
     elif [ "$cmd" = "screenshot" ]; then
+      send_command "reset"
       echo "Receiving screenshot data $b64_filename ..."
-      rm -rf "$b64_filename"
+      rm -rf "$b64_filename" "$upload_filename"
       touch "$lock_filename"
       read line
       while [ -n "$line" ]; do

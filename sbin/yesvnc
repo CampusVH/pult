@@ -1,0 +1,8 @@
+#!/bin/sh
+
+channel="$1"
+
+websocket_port="$((5530 + channel))"
+vnc_port="$((5500 + channel))"
+
+websockify "$websocket_port" "localhost:$vnc_port"

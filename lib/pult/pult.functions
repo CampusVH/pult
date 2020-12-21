@@ -1,4 +1,9 @@
+send_command ()
+{
+  echo "$module_name" $* | nc localhost "$pultd_port"
+}
+
 report_status ()
 {
-  echo "$module_name status $*" | nc localhost "$pultd_port"
+  send_command "status" $*
 }

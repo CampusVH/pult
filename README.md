@@ -1,5 +1,7 @@
 ![PULT logo](www/pult/pult-logo-192x74.png)
 
+[toc]
+
 PULT is the ULTimate Learning/Teaching Tool
 ===========================================
 
@@ -73,7 +75,7 @@ channel's virtual desktop; the modules are the application software
 running on it.
 
 For each channel, the lecturer has a web interface with a row of
-buttons for each module to start and stop it, to make it fullscreen,
+buttons for each module to start and stop it, to make it full-screen,
 or to take a pre-configured window in the channel.  We intentionally
 *don't* let the lecturer drag and drop the window with the mouse.
 Pressing a button is by far less distracting.
@@ -98,7 +100,7 @@ Currently we provide the following modules:
    For a quick solution, we provide *yesVNC*, a VNC server via a web
    interface.
 
- * **CVH-Camera***
+ * **CVH-Camera**
 
    The lecturer or a participant can place a camera view in the
    channel.
@@ -140,17 +142,17 @@ and to show a camera view of the lecturer at the edge.
 
 > ![A minimalistic PULT console](doc/images/pult-channel-1-20201226-153714.png)
 >
-> Figure 1: a minimalistic PULT console.
+> Figure 1: A minimalistic PULT console.
 >
 > VNC is enabled automatically.
 > The buttons are for switching a camera.
 
 > ![A PULT console with many features enabled](doc/images/pult-channel-6-20201226-154114.png)
 >
-> Figure 2: a PULT console with many features enabled
+> Figure 2: A PULT console with many features enabled
 >
 > In this configuration, the lecturer can show 2 different
-> shared desktops (“VNC”), 5 different camera images (“Kamera”),
+> shared desktops (“VNC”), 5 different camera views (“Kamera”),
 > 2 different shared presentations or boards (“Tafel”), plus
 > images or screenshots uploaded by participants (“Upload”).
 >

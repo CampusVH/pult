@@ -1,9 +1,15 @@
 ![PULT logo](www/pult/pult-logo-192x74.png)
 
-[toc]
-
 PULT is the ULTimate Learning/Teaching Tool
 ===========================================
+
+Contents
+--------
+ * What is PULT?
+ * Okay, more technically, what is PULT?
+ * How does this look like in practice?
+
+[To be continud.]
 
 What is PULT?
 -------------

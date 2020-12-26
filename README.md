@@ -59,8 +59,8 @@ content provided by some other tool via a web interface, for
 instance a BigBlueButton presentation or the shared whiteboard of
 OpenMeetings.
 
-PULT itself only handles video.  For the audio part it cooperates
-with Mumble.
+PULT itself only handles video.  For the audio part and chat part
+it cooperates with Mumble.
 
 The virtual “meeting rooms” in PULT are called *channels*.  For each
 channel, there is one instance of noVNC, showing a virtual desktop,
@@ -126,9 +126,9 @@ Currently we provide the following modules:
    This module makes these boards visible in the channel.
 
 Each channel is easily configurable to meet the needs of the
-lecturer.  One lecturer might want as few buttons as possible,
-while another one might prefer to have all modules enabled, just
-in case.
+lecturer.  One lecturer might want as few buttons as possible
+(see fig. 1), while another one might prefer to have all modules
+enabled, just in case (see fig. 2).
 
 For each configured module, the lecturer's console features a row
 of buttons to start and stop the module, and to hide and show its
@@ -138,52 +138,127 @@ rather than full-screen.  For camera modules this is the default.
 A typical application is to run a VNC shared desktop full-screen
 and to show a camera view of the lecturer at the edge. 
 
+> ![A minimalistic PULT console](doc/images/pult-channel-1-20201226-153714.png)
+>
+> Figure 1: a minimalistic PULT console.
+>
+> VNC is enabled automatically.
+> The buttons are for switching a camera.
+
+> ![A PULT console with many features enabled](doc/images/pult-channel-6-20201226-154114.png)
+>
+> Figure 2: a PULT console with many features enabled
+>
+> In this configuration, the lecturer can show 2 different
+> shared desktops (“VNC”), 5 different camera images (“Kamera”),
+> 2 different shared presentations or boards (“Tafel”), plus
+> images or screenshots uploaded by participants (“Upload”).
+>
+> The green colour indicates that the video source is currently
+> active. The yellow colour indicates that it is enabled, but
+> currently waiting for a feed.
+>
+> Below the buttons, the PULT console shows the URLs and other
+> types of information how to feed visual data into the system.
+> These lines remain visible as long as they are needed.
+
 How does this look like in practice?
 ------------------------------------
-Students S1, S2, ... want to take part in a lecture by lecturer L.
-They connect to Mumble for the audio part. For the video part, they
-go to the web page of the channel, type in the channel's password,
-and see a welcome screen.
+ * Students S1, S2, ... want to take part in a lecture by lecturer L.
+   They connect to Mumble for the audio part. For the video part, they
+   go to the web page of the channel, type in the channel's password,
+   and see a welcome screen.
 
-Lecturer L goes to another specific web page, the PULT console.
-L presses the buttons labeled “VNC start” and “Camera start”.
-L starts the VNC server software and connects to the server.
-L's shared desktop appears in the channel.  L follows a link
-from the PULT console to a separate web page to activate the
-camera.  The camera view becomes visible in the lower right
-corner of the channel.
+> ![Welcome screen](doc/images/novnc-welcome-screen-20201226-135612.png)
+>
+> The welcome screen at the Bochum University of Applied Sciences
 
-For welcoming the students, L presses the button labeled
-“Camera max“.  The camera view becomes full-screen, hiding
-the shared desktop.  After the welcoming, L presses “Camera min”
-to switch back to the previous screen arrangement.
+ * Lecturer L goes to another specific web page, the PULT console.
+   L presses the buttons labeled “VNC start” and “Camera start”.
+   L starts the VNC server software and connects to the server.
+   L's shared desktop appears in the channel.  L follows a link
+   from the PULT console to a separate web page to activate the
+   camera.  The camera view becomes visible in the lower right
+   corner of the channel.
 
-Student S1 wants to ask a question.  For this purpose, S1 needs
-to upload a screenshot.  L presses the “Upload start”.  The PULT
-console displays a URL.  L forwards this URL to S1 via the Mumble
-chat.  S1 follows the link and presses the “Screenshot” button.
-S1's screenshot appears in the channel, hiding L's desktop, but
-not the camera view.
+> ![PULT console with VNC and Camera started](doc/images/pult-vnc-and-camera-started-20201226-135647.png)
+>
+> PULT console with VNC and Camera started
 
-While L answers S1's question, L presses “Upload hide” to switch to
-L's desktop, and later “Upload show” to switch back to S1's uploaded
-screenshot.  When the question is answered, L presses “Upload stop”.
-S1's screenshot vanishes, we are back to the full-screen view of L's
-desktop with a camera view in the corner.
+> ![Shared desktop plus camera view](doc/images/novnc-desktop-janus-camera-20201226-180026.png)
+>
+> The noVNC screen shows the lecturer's shared desktop in
+> full-screen mode and the camera view in the lower right corner.
+> The lecturer's desktop features a presentation on the left.
 
-After a while, S2 wants to share a desktop to discuss some results.
-L presses “VNC guest start”.  Since S2 does not have a VNC server
-installed, L copies a URL from the PULT console to S2 in the Mumble
-chat.  S2 follows the URL and presses a button.  S2's desktop is
-presented full-screen in the channel, with L's camera view in the
-corner.  L decides that the camera view hides important parts of
-S2's desktop, and presses “Camera hide”.  The camera view vanishes.
-After the discussion, L presses “VNC Guest stop”.  S2's desktop
-vanishes; L's desktop is visible again.
+ * For welcoming the students, L presses the button labeled
+   “Camera max“.  The camera view becomes full-screen, hiding
+   the shared desktop.  After the welcoming, L presses “Camera min”
+   to switch back to the previous screen arrangement.
 
-At the end of the lecture, L presses “Camera max” to make the
-camera view full-screen to say goodbye.  L presses “Camera stop”
-and “VNC stop”.  The channel shows a welcome screen again.
-To end the session, everyone closes their browser windows.
+> ![Camera full-screen](doc/images/janus-camera-full-screen-20201226-135814.png)
+>
+> The camera in full-screen view
+
+ * Now L wants to explain a source code. L uses the PULT console
+   to switch back from camera full-screen mode to the view of the
+   shared desktop with the camera view in the lower right corner.
+   L minimises the presentation on the desktop and presents the
+   source code.
+
+> ![Shared desktop plus camera view](doc/images/novnc-desktop-and-janus-camera-20201226-135830.png)
+>
+> The same arrangement with the desktop showing a smaller view of
+> the presentation on the right and a source code example on the
+> left.
+
+ * Student S1 wants to ask a question.  For this purpose, S1 needs
+   to upload a screenshot.  L presses the “Upload start”.  The PULT
+   console displays a URL.  L forwards this URL to S1 via the Mumble
+   chat.  S1 follows the link and presses the “Screenshot” button.
+   S1's screenshot appears in the channel, hiding L's desktop, but
+   not the camera view.
+
+ * While L answers S1's question, L presses “Upload hide” to switch to
+   L's desktop, and later “Upload show” to switch back to S1's uploaded
+   screenshot.  When the question is answered, L presses “Upload stop”.
+   S1's screenshot vanishes, we are back to the full-screen view of L's
+   desktop with a camera view in the corner.
+
+ * L asks the students to present some mathematical calculations.
+   S2 volunteers and wants to use the OpenMeeting whiteboard for
+   this purpose. L presses “OM board start” on the PULT console.
+   S2 logs into OpenMeetings and draws the mathematical calculations
+   for everyone to see via noVNC.
+
+> ![Shared OpenMeetigns whiteboard plus camera view](doc/images/novnc-om-board-and-janus-camera-20201226-135905.png)
+>
+> A shared OpenMeetings whiteboard presented via noVNC.
+> The cameraa view still shows the lecturer.
+
+ * S2 wants to share a camera view as well, using Jitsi Meet.
+   L enables the Jitsi Meet camera view via the PULT console.
+   S2 logs into Jitsi Meet, and the second camera view appears
+   on the noVNC screen.
+
+> ![Shared OpenMeetings whiteboard puls two camera views](doc/images/novnc-om-board-janus-camera-and-novnc-camera-20201226-140306.png)
+>
+> A shared OpenMeetings whiteboard presented via noVNC, plus
+> two camera views. The upper one was sent via Jitsi Meet.
+
+ * After a while, S3 wants to share a desktop to discuss some results.
+   L presses “VNC guest start”.  Since S3 does not have a VNC server
+   installed, L copies a URL from the PULT console to S3 in the Mumble
+   chat.  S3 follows the URL and presses a button.  S3's desktop is
+   presented full-screen in the channel, with L's camera view in the
+   corner.  L decides that the camera view hides important parts of
+   S3's desktop, and presses “Camera hide”.  The camera view vanishes.
+   After the discussion, L presses “VNC Guest stop”.  S3's desktop
+   vanishes; L's desktop is visible again.
+
+ * At the end of the lecture, L presses “Camera max” to make the
+   camera view full-screen to say goodbye.  L presses “Camera stop”
+   and “VNC stop”.  The channel shows a welcome screen again.
+   To end the session, everyone closes their browser windows.
 
 [To be continud.]

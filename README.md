@@ -8,8 +8,9 @@ Contents
  * What is PULT?
  * Okay, more technically, what is PULT?
  * How does this look like in practice?
+ * License  
 
-[To be continud.]
+Installation: see INSTALL.md (to be written soon)
 
 What is PULT?
 -------------
@@ -250,7 +251,7 @@ How does this look like in practice?
    on the noVNC screen.
 
 > ![Shared OpenMeetings whiteboard puls two camera views](doc/images/novnc-om-board-janus-camera-and-novnc-camera-20201226-140306.png)
->
+> 
 > A shared OpenMeetings whiteboard presented via noVNC, plus
 > two camera views. The upper one was sent via Jitsi Meet.
 
@@ -269,4 +270,35 @@ How does this look like in practice?
    and “VNC stop”.  The channel shows a welcome screen again.
    To end the session, everyone closes their browser windows.
 
-[To be continud.]
+License
+-------
+
+PULT is Free Software (Open Source) under the
+[GNU Affero General Public License (AGPL)](https://www.gnu.org/licenses/agpl-3.0.html),
+version 3 or higher, 
+
+In short this means:
+
+ * You are free to run the software, for any purpose.
+
+ * You are free to study how the software works and to adopt it
+   to your needs.
+   
+   To make this possible, you have, as a user of the software,
+   the right to obtain its source code, *even if the software
+   runs on a server*, and you only connect to that server.
+   (This “even on a server” clause is what distinguishes the
+   GNU Affero General Public License (AGPL) from the “normal”
+   GNU General Public Licnese (GPL).)
+
+ * You are free to distribute copies of this software,
+   gratis or for a fee, *provided that* you don't deny
+   anyone the rights we gave to you.
+   (This “provided that” clause is the *Copyleft*
+   principle, an essential feature of the GNU licenses.)
+   
+ * You are free to improve this software and to publish your
+   improvements, so the whole society benefits from it.
+
+   Again, you may do this as a charity service, but you are also
+   free to found a business providing this kind of service.

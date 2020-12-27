@@ -1,0 +1,4 @@
+#!/bin/dash
+
+xsetroot -solid white
+xpdf -fullscreen "$HOME/vnc-testbild.pdf" 6

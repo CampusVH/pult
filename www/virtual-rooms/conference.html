@@ -1,0 +1,104 @@
+<!doctype html public "-//W3C//DTD HTML 4.0 Strict//EN">
+<!--
+  Web Interface for Virtual Rooms at Campus Velbert/Heiligenhaus,
+  Bochum University of Applied Sciences
+
+  Copyright 2020  Peter Gerwinski <http://www.peter.gerwinski.de>
+
+  This program is free software: you can redistribute it and/or
+  modify it under the terms of the GNU General Public License as
+  published by the Free Software Foundation, either version 3 of
+  the License, or (at your option) any later version.
+
+  This program is distributed in the hope that it will be useful,
+  but WITHOUT ANY WARRANTY; without even the implied warranty of
+  MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE. See the
+  GNU General Public License for more details.
+
+  You should have received a copy of the GNU General Public License
+  along with this program. If not, see <http://www.gnu.org/licenses/>.
+-->
+<html>
+  <head>
+    <meta http-equiv="Content-Type" content="text/html; charset=utf8">
+    <title>Virtuelle Räume</title>
+    <link rel="stylesheet" href="stylesheets/default.css" type="text/css">
+  </head>
+  <body>
+    <img src="logo-hochschule-bochum-cvh-vertikal-v2-128x205.png"
+         alt="Hochschule Bochum, Campus Velbert/Heiligenhaus"
+         class="logo" align="right"/>
+    <p align="right"><small><a href="index.en.html">[more options]<a></small></p>
+    <h1>Welcome to our Conference!</h1>
+    <noscript>
+      <p>
+        <strong>Please note:</strong>
+        These web interfaces only work with cookies and JavaScript.
+        Sorry for that.
+      </p>
+    </noscript>
+    <script type="text/javascript">
+
+      function generateUserName ()
+      {
+        var userName = document.getElementById ("user_name");
+        var length = 5;
+        var result = 'User_';
+        var characters = '0123456789';
+        var charactersLength = characters.length;
+        for (var i = 0; i < length; i++)
+          result += characters.charAt (Math.floor (Math.random () * charactersLength));
+        userName.value = result;
+      }
+
+      function enterRoom ()
+      {
+        var userName = document.getElementById ("user_name");
+        userName.value = userName.value.replace (/ /g, "_");
+        var url = new URL (window.location.href);
+        var vncChannel = url.searchParams.get ("ch");
+        var password = url.searchParams.get ("pw");
+        var mumbleURL = "https://mumble.cvh-server.de"
+                        + "?channelName=Conference%20Room"
+                        + "&username=" + userName.value
+                        + "&matrix=true";
+        if (!vncChannel)
+          alert ("Room not selected. The link to this page appears to be broken.");
+        else if (!password)
+          alert ("Missing password. The link to this page appears to be broken.");
+        else if (!userName.value)
+          alert ("Missing username. If you want to participate anonymously with a random name, press the “Generate” button.");
+        else if (vncChannel > 0)
+          {
+            var halfResolution = document.getElementById ("half_resolution");
+            window.open (mumbleURL, "_blank");
+            window.location.href = "https://novnc.cvh-server.de/vnc.html?host=novnc.cvh-server.de&port=443&path=websock/"
+                                   + vncChannel + "/&reconnect=1&resize=scale&autoconnect=true&password=" + password;
+          }
+        else
+          window.location.href = mumbleURL;
+        return false;
+      }
+
+    </script>
+    <p>Please enter a name that will be displayed with your contributions.</p>
+    <form onsubmit="return enterRoom ();">
+      <p>
+        Username:
+        <input type="text" size="20" id="user_name"/>
+        <button type="button" id="random" onclick="generateUserName ();">Generate</button>
+      </p>
+      <p><button type="submit" id="submit">Enter Conference Room</button><p>
+    </form>
+    <p>
+      After pressing the “Enter Conference Room” button you will be forwarded
+      to our video system (VNC), where you can watch the presentation.
+      In addition, a second tab will open and connect you to our audio system (Mumble),
+      where you can listen to the speaker, speak yourself, and exchange text messages.
+    </p>
+    <p>
+      Contact:
+      <a href="mailto:peter.gerwinski@hs-bochum.de">Prof. Dr. Peter Gerwinski</a>
+    </p>
+  </body>
+</html>

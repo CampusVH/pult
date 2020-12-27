@@ -1,16 +1,15 @@
-![PULT logo](www/pult/pult-logo-192x74.png)
+![ PULT logo ](www/pult/pult-logo-192x74.png)
 
 PULT is the ULTimate Learning/Teaching Tool
 ===========================================
 
 Contents
 --------
- * What is PULT?
- * Okay, more technically, what is PULT?
- * How does this look like in practice?
- * License  
-
-Installation: see INSTALL.md (to be written soon)
+ * [ What is PULT?                         ](#what-is-pult)
+ * [ Okay, more technically, what is PULT? ](#okay-more-technically-what-is-pult)
+ * [ How does this look like in practice?  ](#how-does-this-look-like-in-practice)
+ * [ Licence                               ](#licence)
+ * [ Installation                          ](#installation)
 
 What is PULT?
 -------------
@@ -37,7 +36,7 @@ What is PULT?
    You can run it on your own server for best-possible data
    protection and privacy.  You can study how it works, adapt
    it to your needs, and publish your improvements for everyone
-   to benefit.  Also, there are no licensing fees.
+   to benefit.  Also, there are no licencing fees.
 
  * **PULT husbands your CPU power and network bandwidth.**
 
@@ -61,15 +60,15 @@ Okay, more technically, what is PULT?
 -------------------------------------
 PULT is a collection of small programs, mostly Unix shell scripts.
 It provides a console (in German: „Pult“:–) where the lecturer can
-select which visual content is offered to the audioence via a web
+select which visual content is offered to the audience via a web
 interface, *noVNC*.  These visual contents can be a shared desktop,
 a camera view, an uploaded image or screenshot, or some arbitrary
 content provided by some other tool via a web interface, for
 instance a BigBlueButton presentation or the shared whiteboard of
 OpenMeetings.
 
-PULT itself only handles video.  For the audio part and chat part
-it cooperates with Mumble.
+PULT itself only handles video.  For the audio part and the chat
+part it cooperates with Mumble.
 
 The virtual “meeting rooms” in PULT are called *channels*.  For each
 channel, there is one instance of noVNC, showing a virtual desktop,
@@ -147,14 +146,14 @@ rather than full-screen.  For camera modules this is the default.
 A typical application is to run a VNC shared desktop full-screen
 and to show a camera view of the lecturer at the edge. 
 
-> ![A minimalistic PULT console](doc/images/pult-channel-1-20201226-153714.png)
+> ![ A minimalistic PULT console ](doc/images/pult-channel-1-20201226-153714.png)
 >
 > Figure 1: A minimalistic PULT console.
 >
 > VNC is enabled automatically.
 > The buttons are for switching a camera.
 
-> ![A PULT console with many features enabled](doc/images/pult-channel-6-20201226-154114.png)
+> ![ A PULT console with many features enabled ](doc/images/pult-channel-6-20201226-154114.png)
 >
 > Figure 2: A PULT console with many features enabled
 >
@@ -178,7 +177,7 @@ How does this look like in practice?
    go to the web page of the channel, type in the channel's password,
    and see a welcome screen.
 
-> ![Welcome screen](doc/images/novnc-welcome-screen-20201226-135612.png)
+> ![ Welcome screen ](doc/images/novnc-welcome-screen-20201226-135612.png)
 >
 > The welcome screen at the Bochum University of Applied Sciences
 
@@ -190,11 +189,11 @@ How does this look like in practice?
    camera.  The camera view becomes visible in the lower right
    corner of the channel.
 
-> ![PULT console with VNC and Camera started](doc/images/pult-vnc-and-camera-started-20201226-135647.png)
+> ![ PULT console with VNC and Camera started ](doc/images/pult-vnc-and-camera-started-20201226-135647.png)
 >
 > PULT console with VNC and Camera started
 
-> ![Shared desktop plus camera view](doc/images/novnc-desktop-janus-camera-20201226-180026.png)
+> ![ Shared desktop plus camera view ](doc/images/novnc-desktop-janus-camera-20201226-180026.png)
 >
 > The noVNC screen shows the lecturer's shared desktop in
 > full-screen mode and the camera view in the lower right corner.
@@ -205,7 +204,7 @@ How does this look like in practice?
    the shared desktop.  After the welcoming, L presses “Camera min”
    to switch back to the previous screen arrangement.
 
-> ![Camera full-screen](doc/images/janus-camera-full-screen-20201226-135814.png)
+> ![ Camera full-screen ](doc/images/janus-camera-full-screen-20201226-135814.png)
 >
 > The camera in full-screen view
 
@@ -215,7 +214,7 @@ How does this look like in practice?
    L minimises the presentation on the desktop and presents the
    source code.
 
-> ![Shared desktop plus camera view](doc/images/novnc-desktop-and-janus-camera-20201226-135830.png)
+> ![ Shared desktop plus camera view ](doc/images/novnc-desktop-and-janus-camera-20201226-135830.png)
 >
 > The same arrangement with the desktop showing a smaller view of
 > the presentation on the right and a source code example on the
@@ -240,7 +239,7 @@ How does this look like in practice?
    S2 logs into OpenMeetings and draws the mathematical calculations
    for everyone to see via noVNC.
 
-> ![Shared OpenMeetigns whiteboard plus camera view](doc/images/novnc-om-board-and-janus-camera-20201226-135905.png)
+> ![ Shared OpenMeetigns whiteboard plus camera view ](doc/images/novnc-om-board-and-janus-camera-20201226-135905.png)
 >
 > A shared OpenMeetings whiteboard presented via noVNC.
 > The cameraa view still shows the lecturer.
@@ -250,7 +249,7 @@ How does this look like in practice?
    S2 logs into Jitsi Meet, and the second camera view appears
    on the noVNC screen.
 
-> ![Shared OpenMeetings whiteboard puls two camera views](doc/images/novnc-om-board-janus-camera-and-novnc-camera-20201226-140306.png)
+> ![ Shared OpenMeetings whiteboard puls two camera views ](doc/images/novnc-om-board-janus-camera-and-novnc-camera-20201226-140306.png)
 > 
 > A shared OpenMeetings whiteboard presented via noVNC, plus
 > two camera views. The upper one was sent via Jitsi Meet.
@@ -270,12 +269,12 @@ How does this look like in practice?
    and “VNC stop”.  The channel shows a welcome screen again.
    To end the session, everyone closes their browser windows.
 
-License
+Licence
 -------
 
 PULT is Free Software (Open Source) under the
-[GNU Affero General Public License (AGPL)](https://www.gnu.org/licenses/agpl-3.0.html),
-version 3 or higher, 
+[ GNU Affero General Public License (AGPL) ](https://www.gnu.org/licenses/agpl-3.0.html),
+either version 3 of the licence, or, at your option, any later version.
 
 In short this means:
 
@@ -286,19 +285,200 @@ In short this means:
    
    To make this possible, you have, as a user of the software,
    the right to obtain its source code, *even if the software
-   runs on a server*, and you only connect to that server.
+   runs on a server, and you only connect to that server*.
    (This “even on a server” clause is what distinguishes the
-   GNU Affero General Public License (AGPL) from the “normal”
-   GNU General Public Licnese (GPL).)
+   GNU Affero GPL from the “normal” GNU GNU GPL.)
 
- * You are free to distribute copies of this software,
-   gratis or for a fee, *provided that* you don't deny
-   anyone the rights we gave to you.
+ * You are free to redistribute copies of this software,
+   gratis or for a fee, *provided that you don't deny
+   anyone the rights we gave to you*.
    (This “provided that” clause is the *Copyleft*
-   principle, an essential feature of the GNU licenses.)
+   principle, an essential feature of the GNU licences.)
    
- * You are free to improve this software and to publish your
-   improvements, so the whole society benefits from it.
+ * You are free to improve this software and to redistribute
+   your improvements, so everyone can benefit from it.
 
    Again, you may do this as a charity service, but you are also
    free to found a business providing this kind of service.
+
+ * There is NO WARRANTY, unless you are paying someone
+   to provide a warranty for you.
+
+The GNU AGPL applies to PULT itself.  Many components used by PULT
+are under different licences.  However they are all Free Software,
+and their licence conditions are essentially subsets of those of
+the GNU AGPL.
+
+A simplified list of the individual licences follows.
+For details, please examine the individual software packages.
+
+ * *Mumble* (server and client): 3-clause BSD licence
+
+ * Mumble web interface *mumble-web*: ISC licence
+
+ * Web server: *nginx*: 2-clause BSD licence,
+   or *Apache*: Apache licence 2.0
+
+ * *noVNC*: MPL 2.0
+
+ * *yesVNC*: GNU APGL 3+ (part of PULT)
+
+ * *websockify*: GNU GPL 3
+
+ * *TigerVNC*: GNU GPL 2.0
+
+ * *TightVNC*: GNU GPL 2.0+
+
+ * *x11vnc*: GNU GPL 2.0
+
+ * *ssvnc*: GNU GPL 2.0
+
+ * *OpenSSH*: 3-clause BSD licence
+
+ * *PuTTY*: MIT/Expat licence
+
+ * *Janus WebRTC Gateway*: GNU GPL 3
+
+ * *Firefox* web browser and *geckodriver*: MPL 2.0
+
+ * *Chromium* web browser and *chromedriver*: 3-clause BSD licence
+
+ * *Selenium*: Apache licence 2.0
+
+ * *Python*: PSF licence
+
+ * *Node.js*: MIT/Expat licence
+
+ * *Netcat*: 3-clause BSD licence
+
+ * *Bash*: GNU GPL 3+
+
+ * *botamusique*: MIT/Expat licence
+
+For an overview about the licences themselves, see
+[ https://www.gnu.org/licenses/license-list.html ](https://www.gnu.org/licenses/license-list.html).
+
+Installation
+------------
+
+You can find detailed installation instructions in the file
+[ doc/pult-install.pdf ](doc/pult-install.pdf) (to be written).
+This section gives a brief overview.
+
+The PULT server was desiged to run on GNU/Linux.  However it should
+not be difficult to make it run on other Unix-like systems.
+
+PULT consists of several parts to be installed separately.  You can
+choose which ones you want to use.  Most of them make use of other
+software which is well-established and probably included in your
+GNU/Linux distribution for easy installation.
+
+ * **Mumble**
+
+   PULT itself only handles video.  For a useful system you need
+   something which handles the audio part.  We highly recommend
+   Mumble for its stability and quality.  Mumble also provides a
+   chat function which has proven very useful.
+
+   PULT comes with some utilites which are designed to cooperate
+   with Mumble.
+
+   For the audience, the most efficient way to participate in Mumble
+   is to install a Mumble client.  If you want to provide an easier,
+   albeit less efficient access method, you can install mumble-web,
+   a web interface for Mumble.
+
+   The Mumble server (Murmur) is included in many GNU/Linux
+   distributions.  The Mumble client (for the audience) for
+   vaious platforms can be downloaded from
+   [ https://www.mumble.com/ ](https://www.mumble.com/).
+   The Mumble web interface is available at
+   [ https://github.com/Johni0702/mumble-web ](https://github.com/Johni0702/mumble-web).
+
+ * **VNC**
+ 
+   Almost everything the audience can watch is conveyed via noVNC.
+
+   For sharing a desktop via VNC, the most efficient way is to
+   install a VNC server on the lecturer's computer.  If you want
+   to provide an easier, albeit less efficient method, you can
+   install yesVNC, a web interface for VNC, developed as part of
+   PULT.
+
+   The VNC server and client software, including the noVNC web
+   interface, is included in many GNU/Linux distributions.
+   Lecturers who want to install a VNC server can use TightVNC,
+   [ https://tightvnc.com/download.php ](https://tightvnc.com/download.php).
+   Lecturers who want to use an SSH tunnel but cannot easily use
+   OpenSSH, can use PuTTY, available at
+   [ https://www.chiark.greenend.org.uk/~sgtatham/putty/ ](https://www.chiark.greenend.org.uk/~sgtatham/putty/).
+
+ * **PULT Itself**
+
+   PULT itself is a collection of small programs, mostly shell
+   scripts, to control everything.  This includes start/stop scripts
+   for systemd, HTML files and CGI scripts for web interfaces, and
+   configuration templates for your web server (*Apache* or *nginx*).
+
+   There is a shell script, *pult-install*, in the same directory as
+   this file.  When you run it with root privileges, it will copy
+   the files which make up PULT to their directories and give them
+   appropriate permissions.  However, this script is incomplete,
+   leaving important tasks such as creating user accounts and
+   enabling systemd services as manual tasks.
+
+ * **CVH-Camera**
+ 
+   We have developed a native camera subsystem for PULT, CVH-Camera.
+   It provides a simple web interface to share a camera view and
+   uses the Janus WebRTC gateway to distribute it to the audience.
+   That way, CVH-Camera provides high quality at resonably low
+   consumption of CPU power and network bandwidth.
+
+   CVH-Camera is available at
+   [ https://gitlab.cvh-server.de/sdoering/cvh-camera ](https://gitlab.cvh-server.de/sdoering/cvh-camera).
+   Parts of it are included in the PULT sources and get installed
+   via the *pult-install* shell script.
+
+ * **Browser-Based Video Contents**
+
+   PULT can use Selenium, Python, and the web browsers Chromium and
+   Firefox for accessing web contents provided by other systems.
+
+   In particular, PULT can extract a camera view out of an external
+   Jitsi Meet or BigBlueButton, as an alternative to CVH-Camera.
+   The browser method requires more CPU power and network bandwidth
+   at a lower quality, but it provides the same level of reliability
+   as CVH-Camera.
+
+   The required software, Selenium, Python, Chromium, ChromeDriver,
+   and Firefox, is included in most GNU/Linux distributions.
+   One additional  component, GecokDriver, can be downloaded from
+   [ https://github.com/mozilla/geckodriver/releases ](https://github.com/mozilla/geckodriver/releases).
+
+ * **External Conference Systems**
+
+   If you want to use a shared whiteboard, we recommend to
+   install OpenMeetings and to import its whiteboard into
+   PULT as a browser-based content (see above).  The same
+   is possible for BigBlueButton.
+   
+   It is straightforward to import contents from other external
+   systems.  Just copy and modify one of the existing modules,
+   for instance *bbb-camera*.
+
+ * **Other Useful Stuff**
+
+   We also provide *CVH-Bot*, a bot which joins the Mumble chat and
+   makes it easy to conduct polls.  CVH-Bot is available at
+   [ https://gitlab.cvh-server.de/jvongehr/cvh-bot ](https://gitlab.cvh-server.de/jvongehr/cvh-bot).
+
+   Speaking of Mumble bots, we can recommend *botamusique* for
+   playing music in Mumble – for your events, for fun and for
+   testing purposes.  You can find botamusique at
+   [ https://github.com/azlux/botamusique ](https://github.com/azlux/botamusique).
+
+   At the Bochum University of Applied Sciences, we provide a web
+   page which allows for quick access to a *virtual room*, i.e. a
+   combination of a Mumble channel and a VNC channel in PULT. Be
+   welcome to copy it and to adapt it to your room structure.

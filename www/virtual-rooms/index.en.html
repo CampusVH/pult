@@ -1,0 +1,265 @@
+<!doctype html public "-//W3C//DTD HTML 4.0 Strict//EN">
+<!--
+  Web Interface for Virtual Rooms at Campus Velbert/Heiligenhaus,
+  Bochum University of Applied Sciences
+
+  Copyright 2020  Peter Gerwinski <http://www.peter.gerwinski.de>
+
+  This program is free software: you can redistribute it and/or
+  modify it under the terms of the GNU General Public License as
+  published by the Free Software Foundation, either version 3 of
+  the License, or (at your option) any later version.
+
+  This program is distributed in the hope that it will be useful,
+  but WITHOUT ANY WARRANTY; without even the implied warranty of
+  MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE. See the
+  GNU General Public License for more details.
+
+  You should have received a copy of the GNU General Public License
+  along with this program. If not, see <http://www.gnu.org/licenses/>.
+-->
+<html>
+  <head>
+    <meta http-equiv="Content-Type" content="text/html; charset=utf8">
+    <title>Virtal Rooms</title>
+    <link rel="stylesheet" href="stylesheets/default.css" type="text/css">
+  </head>
+  <body>
+    <img src="logo-hochschule-bochum-cvh-vertikal-v2-128x205.png"
+         alt="Hochschule Bochum, Campus Velbert/Heiligenhaus"
+         class="logo" align="right"/>
+    <p align="right"><small><a href="index.de.html">[Deutsch]<a></small></p>
+    <h1>Virtual Rooms</h1>
+    <noscript>
+      <p>
+        <strong>Please note:</strong>
+        These web interfaces only work with cookies and JavaScript.
+        Sorry for that.
+      </p>
+    </noscript>
+    <script type="text/javascript">
+
+      function getVncChannel ()
+      {
+        var room = document.getElementById ("room");
+        var vncChannel = 0;
+        switch (room.value)
+          {
+            case "--- please select ---":
+              vncChannel = -1;
+              break;
+            case "Hörsaal%201":
+            case "Seminarraum%201":
+              vncChannel = 1;
+              break;
+            case "Seminarraum%202":
+            case "Conference%20Room":
+              vncChannel = 6;
+              break;
+            case "Hörsaal%203":
+            case "Seminarraum%203":
+              vncChannel = 3;
+              break;
+            case "Hörsaal%204":
+            case "Seminarraum%204":
+              vncChannel = 4;
+              break;
+          }
+        return vncChannel;
+      }
+
+      function roomChanged ()
+      {
+        var vncChannel = getVncChannel ();
+        if (vncChannel < 0)
+          {
+            document.getElementById ("vnc_only").disabled = true;
+            document.getElementById ("vnc_and_mumble").disabled = true;
+            document.getElementById ("vnc_and_mumble").checked = true;
+            document.getElementById ("mumble_only").disabled = true;
+            document.getElementById ("full_resolution").disabled = true;
+            document.getElementById ("half_resolution").disabled = true;
+            document.getElementById ("password").disabled = true;
+            document.getElementById ("password_label").style.color = "gray";
+            document.getElementById ("user_name").disabled = true;
+            document.getElementById ("user_name_label").style.color = "gray";
+            document.getElementById ("submit").disabled = true;
+          }
+        else if (vncChannel > 0)
+          {
+            document.getElementById ("vnc_only").disabled = false;
+            document.getElementById ("vnc_and_mumble").disabled = false;
+            document.getElementById ("vnc_and_mumble").checked = true;
+            document.getElementById ("mumble_only").disabled = false;
+            document.getElementById ("full_resolution").disabled = false;
+            document.getElementById ("half_resolution").disabled = false;
+            document.getElementById ("user_name").disabled = false;
+            document.getElementById ("user_name_label").style.color = "black";
+            document.getElementById ("password").disabled = false;
+            document.getElementById ("password_label").style.color = "black";
+            document.getElementById ("submit").disabled = false;
+          }
+        else
+          {
+            document.getElementById ("vnc_only").disabled = true;
+            document.getElementById ("vnc_and_mumble").disabled = true;
+            document.getElementById ("mumble_only").disabled = false;
+            document.getElementById ("mumble_only").checked = true;
+            document.getElementById ("full_resolution").disabled = true;
+            document.getElementById ("half_resolution").disabled = true;
+            document.getElementById ("user_name").disabled = false;
+            document.getElementById ("user_name_label").style.color = "black";
+            document.getElementById ("password").disabled = true;
+            document.getElementById ("password_label").style.color = "gray";
+            document.getElementById ("submit").disabled = false;
+          }
+      }
+
+      function vncOrMumbleChanged ()
+      {
+        var vncOnly = document.getElementById ("vnc_only");
+        var mumbleOnly = document.getElementById ("mumble_only");
+        if (vncOnly.checked)
+          {
+            document.getElementById ("full_resolution").disabled = false;
+            document.getElementById ("half_resolution").disabled = false;
+            document.getElementById ("user_name").disabled = true;
+            document.getElementById ("user_name_label").style.color = "gray";
+            document.getElementById ("password").disabled = false;
+            document.getElementById ("password_label").style.color = "black";
+            document.getElementById ("submit").disabled = false;
+          }
+        else if (mumbleOnly.checked)
+          {
+            document.getElementById ("full_resolution").disabled = true;
+            document.getElementById ("half_resolution").disabled = true;
+            document.getElementById ("user_name").disabled = false;
+            document.getElementById ("user_name_label").style.color = "black";
+            document.getElementById ("password").disabled = true;
+            document.getElementById ("password_label").style.color = "gray";
+            document.getElementById ("submit").disabled = false;
+          }
+        else
+          {
+            document.getElementById ("full_resolution").disabled = false;
+            document.getElementById ("half_resolution").disabled = false;
+            document.getElementById ("user_name").disabled = false;
+            document.getElementById ("user_name_label").style.color = "black";
+            document.getElementById ("password").disabled = false;
+            document.getElementById ("password_label").style.color = "black";
+            document.getElementById ("submit").disabled = false;
+          }
+      }
+
+      function enterRoom ()
+      {
+        var room = document.getElementById ("room");
+        var vncChannel = getVncChannel ();
+        var userName = document.getElementById ("user_name");
+        var mumbleURL;
+        if (document.getElementById ("vnc_only").checked)
+          mumbleURL = "";
+        else
+          mumbleURL = "https://mumble.cvh-server.de"
+                      + "?channelName=" + room.value
+                      + "&username=" + userName.value
+                      + "&matrix=true";
+        if (vncChannel < 0)
+          alert ("Please select a room.");
+        else if (vncChannel == 6)
+          {
+            var room = "100" + vncChannel;
+            var halfResolution = document.getElementById ("half_resolution");
+            var prescale = "";
+            if (halfResolution.checked)
+              {
+                vncChannel += 10;
+                prescale = "&video_prescale=1/2"
+              }
+            if (mumbleURL.length > 0)
+              window.open (mumbleURL, "_blank");
+            window.location.href = "https://streaming.cvh-server.de/vnc.html?host=streaming.cvh-server.de&port=443&path=websock/"
+                                   + vncChannel + "/&reconnect=1&resize=scale&autoconnect=true&password=" + password.value
+                                   + "&room=" + room + prescale;
+          }
+        else if (vncChannel > 0)
+          {
+            var halfResolution = document.getElementById ("half_resolution");
+            if (halfResolution.checked)
+              vncChannel += 6;
+            if (mumbleURL.length > 0)
+              window.open (mumbleURL, "_blank");
+            window.location.href = "https://novnc.cvh-server.de/vnc.html?host=novnc.cvh-server.de&port=443&path=websock/"
+                                   + vncChannel + "/&reconnect=1&resize=scale&autoconnect=true&password=" + password.value;
+          }
+        else
+          window.location.href = mumbleURL;
+        document.getElementById ("clear_room").selected = true;
+        return false;
+      }
+
+    </script>
+    <form onsubmit="return enterRoom ();">
+      Room:
+      <select name="room" id="room" onchange="roomChanged ();">
+        <option selected="selected" value="none" id="clear_room">--- please select ---</option>
+        <option value="Conference%20Room">Conference Room</option>
+        <option value="Hörsaal%201">Hörsaal 1</option>
+        <option value="Hörsaal%202">Hörsaal 2</option>
+        <option value="Seminarraum%201">Seminarraum 1</option>
+        <option value="Seminarraum%202">Seminarraum 2</option>
+        <option value="Seminarraum%203">Seminarraum 3</option>
+        <option value="Seminarraum%204">Seminarraum 4</option>
+        <option value="Seminarraum%205">Seminarraum 5</option>
+        <option value="Seminarraum%206">Seminarraum 6</option>
+        <option value="Seminarraum%207">Seminarraum 7</option>
+        <option value="Besprechungsraum%201">Besprechungsraum 1</option>
+        <option value="Besprechungsraum%202">Besprechungsraum 2</option>
+        <option value="Raum%201">Raum 1</option>
+        <option value="Raum%202">Raum 2</option>
+        <option value="Raum%203">Raum 3</option>
+        <option value="Raum%204">Raum 4</option>
+        <option value="Raum%205">Raum 5</option>
+        <option value="Raum%206">Raum 6</option>
+      </select>
+      <br/>
+      <table border="0" cellpadding="0" cellspacing="30">
+        <tr valign="top">
+          <td>
+            <input type="radio" name="vnc_or_mumble" id="vnc_only" disabled="true" onchange="vncOrMumbleChanged ();"/>
+            <label for="vnc_only">video only (audio via Mumble)</label><br/>
+            <input type="radio" name="vnc_or_mumble" id="vnc_and_mumble" checked="checked" disabled="true" onchange="vncOrMumbleChanged ();"/>
+            <label for="vnc_and_mumble">video and audio (2 tabs)</label><br/>
+            <input type="radio" name="vnc_or_mumble" id="mumble_only" disabled="true" onchange="vncOrMumbleChanged ();"/>
+            <label for="mumble_only">audio only (Mumble web client)</label>
+          </td>
+          <td>
+            <input type="radio" name="resolution" id="full_resolution" checked="checked" disabled="true"/>
+            <label for="full_resolution">full resolution</label><br/>
+            <input type="radio" name="resolution" id="half_resolution" disabled="true"/>
+            <label for="half_resolution">half resolution</label><br/>
+          </td>
+        </tr>
+      </table>
+      <table border="0" cellpadding="0" cellspacing="5">
+        <tr>
+          <td id="password_label" style="color: gray;">Password for VNC:</td>
+          <td><input type="password" size="25" id="password" disabled="true"/></td>
+        </tr>
+        <tr valign="top">
+          <td id="user_name_label" style="color: gray;">Username for Mumble: &nbsp;</td>
+          <td>
+            <input type="text" size="25" id="user_name" disabled="true"/><br/>
+            <font size="-3">(e.&thinsp;g.&nbsp;pgerwinski for “Peter Gerwinski”)</font>
+          </td>
+        </tr>
+      </table>
+      <br/>
+      <button type="submit" id="submit" disabled="true">Enter Room</button>
+    </form>
+    <p>
+      Contact:
+      <a href="mailto:peter.gerwinski@hs-bochum.de">Prof. Dr. Peter Gerwinski</a>
+    </p>
+  </body>
+</html>

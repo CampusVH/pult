@@ -85,6 +85,13 @@ Please install manually:
  - etc/nginx/sites-available/fragment.conf  in your nginx configuration
  - etc/janus/janus.plugin.videoroom.jcfg.fragment  in your janus configuration
  - www/vnc  as your VNC channel web page
+ - www/virtual-rooms  as your quick access interface
+ - home/pult  as the home directory for your "pult" user
+ - home/pult/vncX  as the VNC home directories inside /home/pult
+   Note: It contains a subdirectory ".vnc".
+   Replace X by the channel numbers: vnc1, vnc2, ...
+   The file ".vnc/passwdfile" is plain text.  When you change it,
+   use "cat passwdfile | vncpasswd -f > passwd" to regenerate a "passwd" file.
  - adapt cvh-camera-update-credentials to your www directory,
    and add a cron job to execute it periodically, for instance:
    42 * * * * $sbin_directory/cvh-camera-update-credentials

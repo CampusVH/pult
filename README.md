@@ -59,7 +59,7 @@ What is PULT?
 Okay, more technically, what is PULT?
 -------------------------------------
 PULT is a collection of small programs, mostly Unix shell scripts.
-It provides a console (in German: „Pult“:–) where the lecturer can
+It provides a console (in German: „Pult“ :–) where the lecturer can
 select which visual content is offered to the audience via a web
 interface, *noVNC*.  These visual contents can be a shared desktop,
 a camera view, an uploaded image or screenshot, or some arbitrary
@@ -102,9 +102,9 @@ Currently we provide the following modules:
    at a reasonable speed, using only moderate CPU resources and
    network bandwidth.
 
-   For best performance, we recommand installing a local VNC server.
-   For a quick solution, we provide *yesVNC*, a VNC server via a web
-   interface.
+   For best performance, we recommand installing a VNC server on the
+   lecturer's computer.  For a quick solution, we provide *yesVNC*,
+   a VNC server via a web interface.
 
  * **CVH-Camera**
 
@@ -130,7 +130,7 @@ Currently we provide the following modules:
  * **OM-Board** and **BBB-Board**
 
    OpenMeetings and BigBlueButton provide shared whiteboards, where
-   the lecturer and participants can draw and upload presentations.
+   the lecturer and the participants can draw and upload presentations.
    This module makes these boards visible in the channel.
 
 Each channel is easily configurable to meet the needs of the
@@ -150,7 +150,7 @@ and to show a camera view of the lecturer at the edge.
 >
 > Figure 1: A minimalistic PULT console.
 >
-> VNC is enabled automatically.
+> VNC gets started automatically.
 > The buttons are for switching a camera.
 
 > ![ A PULT console with many features enabled ](doc/images/pult-channel-6-20201226-154114.png)
@@ -163,8 +163,8 @@ and to show a camera view of the lecturer at the edge.
 > images or screenshots uploaded by participants (“Upload”).
 >
 > The green colour indicates that the video source is currently
-> active. The yellow colour indicates that it is enabled, but
-> currently waiting for a feed.
+> active. The yellow colour indicates that it has been started,
+> but is currently waiting for a feed.
 >
 > Below the buttons, the PULT console shows the URLs and other
 > types of information how to feed visual data into the system.
@@ -234,7 +234,7 @@ How does this look like in practice?
    desktop with a camera view in the corner.
 
  * L asks the students to present some mathematical calculations.
-   S2 volunteers and wants to use the OpenMeeting whiteboard for
+   S2 volunteers and wants to use the OpenMeetings whiteboard for
    this purpose. L presses “OM board start” on the PULT console.
    S2 logs into OpenMeetings and draws the mathematical calculations
    for everyone to see via noVNC.
@@ -296,7 +296,7 @@ In short this means:
    principle, an essential feature of the GNU licences.)
    
  * You are free to improve this software and to redistribute
-   your improvements, so everyone can benefit from it.
+   your improvements, so everyone can benefit from them.
 
    Again, you may do this as a charity service, but you are also
    free to found a business providing this kind of service.
@@ -361,8 +361,7 @@ For an overview about the licences themselves, see
 Installation
 ------------
 
-You can find detailed installation instructions in the file
-[ doc/pult-install.pdf ](doc/pult-install.pdf) (to be written).
+Detailed installation instructions ar being written *right now*.
 This section gives a brief overview.
 
 The PULT server was desiged to run on GNU/Linux.  However it should
@@ -417,7 +416,7 @@ GNU/Linux distribution for easy installation.
 
    PULT itself is a collection of small programs, mostly shell
    scripts, to control everything.  This includes start/stop scripts
-   for systemd, HTML files and CGI scripts for web interfaces, and
+   for systemd, HTML files, CGI scripts for web interfaces, and
    configuration templates for your web server (*Apache* or *nginx*).
 
    There is a shell script, *pult-install*, in the same directory as
@@ -432,7 +431,7 @@ GNU/Linux distribution for easy installation.
    We have developed a native camera subsystem for PULT, CVH-Camera.
    It provides a simple web interface to share a camera view and
    uses the Janus WebRTC gateway to distribute it to the audience.
-   That way, CVH-Camera provides high quality at resonably low
+   That way, CVH-Camera provides high quality at a reasonably low
    consumption of CPU power and network bandwidth.
 
    CVH-Camera is available at
@@ -467,7 +466,7 @@ GNU/Linux distribution for easy installation.
    systems.  Just copy and modify one of the existing modules,
    for instance *bbb-camera*.
 
- * **Other Useful Stuff**
+ * **Other Useful Tools**
 
    We also provide *CVH-Bot*, a bot which joins the Mumble chat and
    makes it easy to conduct polls.  CVH-Bot is available at
@@ -479,6 +478,10 @@ GNU/Linux distribution for easy installation.
    [ https://github.com/azlux/botamusique ](https://github.com/azlux/botamusique).
 
    At the Bochum University of Applied Sciences, we provide a web
-   page which allows for quick access to a *virtual room*, i.e. a
-   combination of a Mumble channel and a VNC channel in PULT. Be
-   welcome to copy it and to adapt it to your room structure.
+   page which allows for quick access to a *virtual room*, i.e.
+   a combination of a Mumble channel and a VNC channel in PULT,
+   see the subdirectory *www/virtual-rooms/* of the PULT sources.
+   Be welcome to copy it and to adapt it to your room structure.
+
+*Viel Erfolg und viel Spaß!*  
+Have success and enjoy!

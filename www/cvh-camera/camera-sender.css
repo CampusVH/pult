@@ -1,12 +1,3 @@
-#preview-container {
-	margin: 8px;
-	height: 500px; 
-}
-
-button,select,option,input {
-        font-size: small;
-}
-
-body {
-        font-size: medium;
+.visually-hidden {
+    visibility: hidden;
 }

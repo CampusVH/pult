@@ -27,10 +27,10 @@ module ()
   fi
 }
 
+. "/usr/local/etc/pult/pult-$channel.conf"
+
 max_width=$(echo "$camera_default_max_resolution" | cut -d "x" -f 1)
 max_height=$(echo "$camera_default_max_resolution" | cut -d "x" -f 2)
-
-. "/usr/local/etc/pult/pult-$channel.conf"
 
 $debug && echo "$0[$channel]: url = $url" 1>&2
 

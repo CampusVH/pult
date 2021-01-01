@@ -20,6 +20,7 @@ max_text="max"
 lock_file="/usr/local/var/run/pult/pultd-$channel.lock"
 status_file="/usr/local/var/run/pult/pult-status-$channel"
 declare -A module_status
+declare -A module_info
 
 . "/usr/local/etc/pult/pult.conf"
 
@@ -90,14 +91,14 @@ module ()
           fi
           ;;
         "invitation="*)
-          local invitation="$(echo $opt | sed -e 's/^invitation=//')"
+          local invitation=$(echo "$opt" | sed -e 's/^invitation=//' -e "s/@INFO@/${module_info[$m]}/g")
           local status="${module_status[$m]}"
           if [ -n "$status" -a "$status" != "running" ]; then
             print_invitation="$print_invitation<center><strong>$module_name:</strong> $invitation</center>"
           fi
           ;;
         "persistent_invitation="*)
-          local invitation="$(echo $opt | sed -e 's/^persistent_invitation=//')"
+          local invitation=$(echo "$opt" | sed -e 's/^persistent_invitation=//' -e "s/@INFO@/${module_info[$m]}/g")
           local status="${module_status[$m]}"
           if [ -n "$status" ]; then
             print_invitation="$print_invitation<center><strong>$module_name:</strong> $invitation</center>"

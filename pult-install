@@ -50,6 +50,7 @@ do
 done
 
 $install -o root -g root -m 644 sbin/*.{py,js} "$sbin_directory/"
+$install -o root -g root -m 644 sbin/models/*.js "$sbin_directory/models/"
 $install -o root -g root -m 755 lib/pult/*.{module,daemon} "$lib_directory/pult/"
 $install -o root -g root -m 644 lib/pult/*.{py,functions} "$lib_directory/pult/"
 install_symlink "$lib_directory/pult/pult.daemon" "$sbin_directory/pultd"

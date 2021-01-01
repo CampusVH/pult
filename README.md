@@ -362,6 +362,11 @@ Installation
 ------------
 
 Detailed installation instructions ar being written *right now*.
+
+We are also planning to provide a ready-to-run PULT installation
+as a Docker container. That way you can install it in just a few
+minutes.
+
 This section gives a brief overview.
 
 The PULT server was desiged to run on GNU/Linux.  However it should

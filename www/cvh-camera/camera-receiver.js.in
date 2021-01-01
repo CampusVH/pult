@@ -1,4 +1,4 @@
-var server = 'https://' + window.location.hostname + ':5509/janus';
+var server = 'https://' + window.location.hostname + ':8089/janus';
 
 var janus = null;
 var videoroomHandle = null;
@@ -10,7 +10,6 @@ var source = null;
 
 document.addEventListener('DOMContentLoaded', function() {
 	parseRoomFromURL();
-        document.title += ' ' + room.toString();
 
 	Janus.init({ debug: 'all', callback: function() {
 		if (!Janus.isWebrtcSupported()) {

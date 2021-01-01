@@ -5,6 +5,7 @@ debug=true
 module_name="$1"
 channel="$2"
 camera_room="$((1000 + channel))"
+camera_server_port="$((5010 + channel))"
 browser=true
 direct=false
 
@@ -28,21 +29,27 @@ module ()
         "camera_room="*)
           camera_room="$(echo $opt | sed -e 's/^camera_room=//')"
           ;;
+        "browser="*)
+          browser="$(echo $opt | sed -e 's/^browser=//')"
+          ;;
         "direct="*)
           direct="$(echo $opt | sed -e 's/^direct=//')"
           ;;
-        "browser="*)
-          browser="$(echo $opt | sed -e 's/^browser=//')"
+        "camera_server_port="*)
+          camera_server_port="$(echo $opt | sed -e 's/^camera_server_port=//')"
+          ;;
+        "slot="*)
+          slot="$(echo $opt | sed -e 's/^slot=//')"
           ;;
       esac
     done
   fi
 }
 
+. "/usr/local/etc/pult/pult-$channel.conf"
+
 max_width=$(echo "$camera_default_max_resolution" | cut -d "x" -f 1)
 max_height=$(echo "$camera_default_max_resolution" | cut -d "x" -f 2)
-
-. "/usr/local/etc/pult/pult-$channel.conf"
 
 $debug && echo "$0[$channel]: url = $url" 1>&2
 
@@ -54,6 +61,14 @@ cleanup ()
 }
 
 trap cleanup exit;
+
+if $direct; then
+  token="$(dd if=/dev/urandom bs=1 count=32 2>/dev/null | shasum | cut -d " " -f 1)"
+  $debug && echo "$0[$channel]: sending command to camera server: activate_slot" 1>&2
+  echo "activate_slot $slot $token" | nc -q 0 localhost "$camera_server_port"
+else
+  token=""
+fi
 
 if $browser; then
 
@@ -76,14 +91,14 @@ if $browser; then
   rm -rf "$pid_file"
   echo "$chromium_pid" > "$pid_file"
   if wait "$selenium_pid"; then
-    report_status "running" "$windowid" "$max_width" "$max_height"
+    report_status "running" "$windowid" "$max_width" "$max_height" "$token"
   else
     $debug && echo "start of $module_name interrupted" 1>&2
   fi
 
 elif $direct; then
 
-  report_status "running" "NULL" "$max_width" "$max_height"
+  report_status "running" "NULL" "$max_width" "$max_height" "$token"
 
 else
 

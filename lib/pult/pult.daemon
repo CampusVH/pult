@@ -23,6 +23,7 @@ declare -A module_min_geometry
 declare -A module_wid
 declare -A module_w
 declare -A module_h
+declare -A module_info
 
 invoke_module ()
 {
@@ -133,18 +134,20 @@ switch_to_geometry ()
   local h="$4"
   local x="$5"
   local y="$6"
+  local z="$7"
   if [ "$wid" != "NULL" ]; then
     $debug && echo xdotool windowmove "$wid" "$x" "$y" windowsize "$wid" "$w" "$h" windowraise "$wid" 1>&2
     xdotool windowmove "$wid" "$x" "$y" windowsize "$wid" "$w" "$h" windowraise "$wid"
   else
     $debug && echo "module $mm: no window id" 2>&2
   fi
-  invoke_module "$mm" "geometry" "$w" "$h" "$x" "$y"
+  invoke_module "$mm" "geometry" "$w" "$h" "$x" "$y" "$z"
 }
 
 position_min_module ()
 {
   local mm="$1"
+  local z="$2"
   local wid=${module_wid["$mm"]}
   local geometry=${module_min_geometry["$mm"]}
   if [ -z "$geometry" ]; then
@@ -167,7 +170,7 @@ position_min_module ()
     if [ "$new_pos_y_sign" = "-" ]; then
       new_pos_y=$((screen_height - min_height - new_pos_y))
     fi
-    switch_to_geometry "$mm" "$wid" "$min_width" "$min_height" "$new_pos_x" "$new_pos_y"
+    switch_to_geometry "$mm" "$wid" "$min_width" "$min_height" "$new_pos_x" "$new_pos_y" "$z"
   fi
 }
 
@@ -175,11 +178,13 @@ position_all_min_modules_except ()
 {
   local exception="$1"
   local mm
+  local z=1
   for mm in "${!module_min[@]}"; do
     $debug && echo -e "$0: running 1: mm = $mm, min = ${module_min[$mm]}, status = ${module_status[$mm]}" 1>&2
     if [ "$mm" != "$exception" ] && [ "$mm" != "$primary_module" ] && ${module_min["$mm"]} && [ "${module_status[$mm]}" = "running" ]; then
-      position_min_module "$mm"
+      position_min_module "$mm" "$z"
     fi
+    z=$((z + 1))
   done
 }
 
@@ -196,7 +201,7 @@ position_primary_module ()
     local h=${module_h["$primary_module"]}
     $debug && echo -e "$0: wid = $wid, w = $w, h = $h" 1>&2
     switch_to_resolution "$w" "$h"
-    switch_to_geometry "$primary_module" "$wid" "$screen_width" "$screen_height" "0" "0"
+    switch_to_geometry "$primary_module" "$wid" "$screen_width" "$screen_height" "0" "0" "0"
   fi
 }
 
@@ -235,6 +240,9 @@ update_pult_status ()
   for mm in "${!module_status[@]}"; do
     echo -e "module_status[$mm]=\"${module_status[$mm]}\"" >> "$status_file"
   done
+  for mm in "${!module_status[@]}"; do
+    echo -e "module_info[$mm]=\"${module_info[$mm]}\"" >> "$status_file"
+  done
 }
 
 shopt -s lastpipe
@@ -272,10 +280,12 @@ while true; do
             wid="${cmd[3]}"
             w="${cmd[4]}"
             h="${cmd[5]}"
+            info="${cmd[6]}"
             $debug && echo -e "$0: wid = $wid, w = $w, h = $h" 1>&2
             module_wid["$m"]="$wid"
             module_w["$m"]="$w"
             module_h["$m"]="$h"
+            module_info["$m"]="$info"
             if ! ${module_min["$m"]} || [ -z "$primary_module" ] || ${module_min["$primary_module"]}; then
               $debug && echo -n "min[m] = ${module_min["$m"]}, p = $primary_module" 1>&2
               if [ -n "$primary_module" ]; then
@@ -314,7 +324,7 @@ while true; do
               fi
               position_all_min_modules_except "$m"
               $debug && echo -e "$0: minimising 3: m = $m, min = ${module_min[$m]}, status = ${module_status[$m]}" 1>&2
-              position_min_module "$m"
+              position_min_module "$m" "999"
             else
               echo "$0: trying to minimise module $m, which is not minimiseable"
             fi

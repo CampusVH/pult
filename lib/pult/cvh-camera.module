@@ -24,11 +24,15 @@ module ()
         "camera_room="*)
           camera_room="$(echo $opt | sed -e 's/^camera_room=//')"
           ;;
+        "direct="*)
+          direct="$(echo $opt | sed -e 's/^direct=//')"
+          ;;
         "camera_server_port="*)
           camera_server_port="$(echo $opt | sed -e 's/^camera_server_port=//')"
           ;;
-        "direct="*)
-          direct="$(echo $opt | sed -e 's/^direct=//')"
+        "slot="*)
+          slot="$(echo $opt | sed -e 's/^slot=//')"
+          ;;
       esac
     done
   fi
@@ -48,8 +52,8 @@ case "$cmd" in
     ;;
   stop)
     if $direct; then
-      $debug && echo "$0[$channel]: sending command to camera server: hide" 1>&2
-      echo "hide" | nc -q 0 localhost "$camera_server_port"
+      $debug && echo "$0[$channel]: sending command to camera server: deactivate_slot" 1>&2
+      echo "deactivate_slot $slot" | nc -q 0 localhost "$camera_server_port"
     fi
     if [ -f "$pid_file" ]; then
       pid=$(cat "$pid_file")
@@ -64,16 +68,17 @@ case "$cmd" in
     echo "min=true browser=true direct=false"
     ;;
   geometry)
-    $debug && echo "new geometry: ${2}x${3}+$4+$5" 1>&2
+    $debug && echo "new geometry: ${2}x${3}+$4+$5, z = $6" 1>&2
     if $direct; then
       if [ "$2" = "hidden" ]; then
-        $debug && echo "$0[$channel]: sending command to camera server: hide" 1>&2
-        echo "hide" | nc -q 0 localhost "$camera_server_port"
+        $debug && echo "$0[$channel]: sending command to camera server: hide $slot" 1>&2
+        echo "hide $slot" | nc -q 0 localhost "$camera_server_port"
       else
-        $debug && echo "$0[$channel]: sending command to camera server: show" 1>&2
-        echo "show" | nc -q 0 localhost "$camera_server_port"
-        $debug && echo "$0[$channel]: sending command to camera server: set_geometry_relative_to_canvas lt $4 $5 $2 $3" 1>&2
-        echo "set_geometry_relative_to_canvas lt $4 $5 $2 $3" | nc -q 0 localhost "$camera_server_port"
+        $debug && echo "$0[$channel]: sending command to camera server: show $slot" 1>&2
+        echo "show $slot" | nc -q 0 localhost "$camera_server_port"
+        sleep 0.1
+        $debug && echo "$0[$channel]: sending command to camera server: set_geometry_relative_to_canvas $slot lt $4 $5 $2 $3 $6" 1>&2
+        echo "set_geometry_relative_to_canvas $slot lt $4 $5 $2 $3 $6" | nc -q 0 localhost "$camera_server_port"
       fi
     fi
     ;;

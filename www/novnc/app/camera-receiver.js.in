@@ -122,9 +122,12 @@ document.addEventListener('DOMContentLoaded', function() {
         delete videoGeometryParams[slot];
         delete source[slot];
         var video = document.getElementById('camera-feed-' + slot);
-        video.remove();
-        janusPluginHandles[slot].detach();
-        delete janusPluginHandles[slot];
+        if (video)
+            video.remove();
+        if (janusPluginHandles[slot]) {
+            janusPluginHandles[slot].detach();
+            delete janusPluginHandles[slot];
+        }
     }
 
     function newRemoteFeed(slot, feedId, initialState) {

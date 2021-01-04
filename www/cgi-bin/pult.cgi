@@ -77,9 +77,9 @@ module ()
     esac
     echo -e "      <tr>"
     echo -e "        <td><div class=\"module_name\"><div class=\"$module_class\">$module_name</div></div></td>"
-    echo -e "        <td><form action=\"pult-$channel.cgi\" method=\"post\"><input type=\"hidden\" name=\"$m\" value=\"start\"><button class=\"channel\" type=\"submit\">$start_text</button></form></td>"
-    echo -e "        <td><form action=\"pult-$channel.cgi\" method=\"post\"><input type=\"hidden\" name=\"$m\" value=\"stop\"><button class=\"channel\" type=\"submit\">$stop_text</button></form></td>"
-    echo -e "        <td><form action=\"pult-$channel.cgi\" method=\"post\"><input type=\"hidden\" name=\"$m\" value=\"hide\"><button class=\"channel\" type=\"submit\">$hide_text</button></form></td>"
+    echo -e "        <td><form action=\"pult-$channel.cgi\" method=\"post\"><input type=\"hidden\" name=\"$m\" value=\"start\"><button class=\"channel\" type=\"submit\" style=\"$start_style\">$start_text</button></form></td>"
+    echo -e "        <td><form action=\"pult-$channel.cgi\" method=\"post\"><input type=\"hidden\" name=\"$m\" value=\"stop\"><button class=\"channel\" type=\"submit\" style=\"$stop_style\">$stop_text</button></form></td>"
+    echo -e "        <td><form action=\"pult-$channel.cgi\" method=\"post\"><input type=\"hidden\" name=\"$m\" value=\"hide\"><button class=\"channel\" type=\"submit\" style=\"$hide_style\">$hide_text</button></form></td>"
     local min=false
     local defaults=$(invoke_module "$m" "$d" "defaults")
     for opt in $defaults "$@"; do
@@ -87,7 +87,7 @@ module ()
         "min="*)
           eval "$opt"
           if "$min"; then
-            echo -e "        <td><form action=\"pult-$channel.cgi\" method=\"post\"><input type=\"hidden\" name=\"$m\" value=\"min\"><button class=\"channel\" type=\"submit\">$min_text</button></form></td>"
+            echo -e "        <td><form action=\"pult-$channel.cgi\" method=\"post\"><input type=\"hidden\" name=\"$m\" value=\"min\"><button class=\"channel\" type=\"submit\" style=\"$min_style\">$min_text</button></form></td>"
           fi
           ;;
         "invitation="*)
@@ -107,10 +107,12 @@ module ()
       esac
     done
     local max_or_show_text="$show_text"
+    local max_or_show_style="$show_style"
     if "$min"; then
       max_or_show_text="$max_text"
+      max_or_show_style="$max_style"
     fi
-    echo -e "        <td><form action=\"pult-$channel.cgi\" method=\"post\"><input type=\"hidden\" name=\"$m\" value=\"max\"><button class=\"channel\" type=\"submit\">$max_or_show_text</button></form></td>"
+    echo -e "        <td><form action=\"pult-$channel.cgi\" method=\"post\"><input type=\"hidden\" name=\"$m\" value=\"max\"><button class=\"channel\" type=\"submit\" style=\"$max_or_show_style\">$max_or_show_text</button></form></td>"
     echo -e "      </tr>"
   fi
 }

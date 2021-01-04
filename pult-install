@@ -73,6 +73,7 @@ $install -o root -g root -m 644 www/cvh-camera/* "$www_directory/cvh-camera/"
 $install -o root -g root -m 644 www/novnc/vnc.html "$novnc_directory/"
 $install -o root -g root -m 644 www/novnc/core/*.js "$novnc_directory/core/"
 $install -o root -g root -m 644 www/novnc/app/*.js "$novnc_directory/app/"
+$install -o root -g root -m 644 www/novnc/app/*.js.in "$novnc_directory/app/"
 $install -o root -g root -m 644 www/novnc/app/styles/*.css "$novnc_directory/app/styles/"
 $install -o root -g root -m 644 etc/systemd/system/* /etc/systemd/system/
 

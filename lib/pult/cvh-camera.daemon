@@ -5,7 +5,6 @@ debug=true
 module_name="$1"
 channel="$2"
 camera_room="$((1000 + channel))"
-camera_server_port="$((5010 + channel))"
 browser=true
 direct=false
 
@@ -14,6 +13,9 @@ direct=false
 
 pid_file="$run_directory/$module_name-$channel.pid"
 $debug && echo "$0[$channel]: pid_file = $pid_file" 1>&2
+
+input_fifo="$run_directory/cvh-camera-$channel.input"
+$debug && echo "$0[$channel]: input_fifo = $input_fifo" 1>&2
 
 module ()
 {
@@ -34,9 +36,6 @@ module ()
           ;;
         "direct="*)
           direct="$(echo $opt | sed -e 's/^direct=//')"
-          ;;
-        "camera_server_port="*)
-          camera_server_port="$(echo $opt | sed -e 's/^camera_server_port=//')"
           ;;
         "slot="*)
           slot="$(echo $opt | sed -e 's/^slot=//')"
@@ -65,7 +64,7 @@ trap cleanup exit;
 if $direct; then
   token="$(dd if=/dev/urandom bs=1 count=32 2>/dev/null | shasum | cut -d " " -f 1)"
   $debug && echo "$0[$channel]: sending command to camera server: activate_slot" 1>&2
-  echo "activate_slot $slot $token" | nc -q 0 localhost "$camera_server_port"
+  echo "activate_slot $slot $token" > "$input_fifo"
 else
   token=""
 fi

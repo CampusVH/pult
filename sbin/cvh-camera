@@ -3,14 +3,15 @@
 channel="$1"
 
 server_port="$((5000 + channel))"
-pult_port="$((5010 + channel))"
+pult_fifo="/usr/local/var/run/pult/cvh-camera-$channel.input"
+
+if [ -p "$pult_fifo" ]; then
+  cat "$pult_fifo" > /dev/null
+else
+  mkfifo "$pult_fifo"
+fi
 
 export NODE_PATH="/usr/lib/node_modules"
 export PORT="$server_port"
 
-(
-  echo "hide"
-  while true; do
-    nc.openbsd -l "$pult_port"
-  done
-) | node /usr/local/sbin/cvh-camera-server.js
+tail -F "$pult_fifo" | node /usr/local/sbin/cvh-camera-server.js

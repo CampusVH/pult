@@ -69,12 +69,18 @@ case "$cmd" in
       sleep 0.1
     done
     if ps -p "$websockify_pid" > /dev/null; then
-      ps -o pid,ppid -ax | grep "$websockify_pid\$" | cut -d " " -f 1 >> "$pid_file"
+      daemon_pid=$(ps -o pid,ppid -ax | grep "$websockify_pid\$" | cut -d " " -f 1)
+      echo "$daemon_pid" >> "$pid_file"
+      sleep 0.1
+      nc_pid=$(ps -o pid,ppid -ax | grep "$daemon_pid\$" | cut -d " " -f 1)
+      echo "$nc_pid" >> "$pid_file"
+      $debug && echo "websockify_pid = $websockify_pid, daemon_pid = $daemon_pid, nc_pid = $nc_pid" 1>&2
       (sleep 0.1; report_status "listening") &
     fi
     ;;
   stop)
     if [ -f "$pid_file" ]; then
+      $debug && echo "killing $(cat $pid_file)" 1>&2
       kill $(cat "$pid_file") || true
       rm -rf "$pid_file"
     fi
@@ -107,6 +113,10 @@ case "$cmd" in
             true
           else
             convert -geometry "$max_width"x"$max_height" "$image_file" "$image_file"
+            image_identify=$(identify "$image_file")
+            image_size=$(echo "$image_identify" | cut -d " " -f 3)
+            image_width=$(echo "$image_size" | cut -d "x" -f 1)
+            image_height=$(echo "$image_size" | cut -d "x" -f 2)
           fi
           mv "$image_file" "$www_dir$download_dir/"
           image_file="$www_dir$download_dir/$filename"

@@ -48,6 +48,7 @@ if [ -z "$url" ]; then
   exit 1
 fi
 
+report_status "listening"
 env python3 "$module_directory/bbb-camera.py" "$url" &
 selenium_pid="$!"
 line=$(xwininfo -root -children | grep "bbb\.cvh-server\.de")
@@ -56,8 +57,8 @@ while [ -z "$line" ]; do
   line=$(xwininfo -root -children | grep "data:\|Datenschutz\|BigBlueButton")
 done
 windowid=$(echo $line | cut -d " " -f 1)
+report_status "waiting"
 xdotool set_window --name "Controlled by PULT" "$windowid"
-report_status "waiting" "$windowid" "$max_width" "$max_height"
 chromium_pid=$(xdotool getwindowpid "$windowid")
 $debug && echo "$0[$channel]: chromium_pid = $chromium_pid" 1>&2
 rm -rf "$pid_file"

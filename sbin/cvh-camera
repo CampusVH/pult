@@ -3,15 +3,35 @@
 channel="$1"
 
 server_port="$((5000 + channel))"
-pult_fifo="/usr/local/var/run/pult/cvh-camera-$channel.input"
+input_fifo="/usr/local/var/run/pult/cvh-camera-$channel.input"
+output_fifo="/usr/local/var/run/pult/cvh-camera-$channel.output"
 
-if [ -p "$pult_fifo" ]; then
-  cat "$pult_fifo" > /dev/null
-else
-  mkfifo "$pult_fifo"
-fi
+for fifo in "$input_fifo" "$output_fifo"; do
+  if [ -p "$fifo" ]; then
+    if [ -s "$fifo" ]; then
+      echo "$fifo contains data:"
+      cat "$fifo"
+      echo "End of data in $fifo."
+    else
+      echo "$fifo already exists"
+    fi
+  else
+    echo "creating $fifo"
+    mkfifo "$fifo"
+  fi
+done
 
 export NODE_PATH="/usr/lib/node_modules"
-export PORT="$server_port"
+export CONFIG_PATH="/usr/local/etc/pult/cvh-camera-$channel.json"
 
-tail -F "$pult_fifo" | node /usr/local/sbin/cvh-camera-server.js
+tail -f "$input_fifo" | node /usr/local/sbin/cvh-camera-server.js &
+
+shopt -s lastpipe
+
+tail -f "$output_fifo" | \
+  while read cmd slot param; do
+    export PULT_CHANNEL="$channel"
+    export CVH_CAMERA_SLOT="$slot"
+    echo "slot $slot: invoking cvh-camera.module $cmd $param"
+    /usr/local/lib/pult/cvh-camera.module "$cmd" "$param"
+  done

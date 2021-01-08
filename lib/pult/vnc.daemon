@@ -59,6 +59,10 @@ while true; do
 #            height=$((height + 24))
 #          fi
           line=$(xwininfo -root -children | grep "SSVNC")
+          while [ -z "$line" ]; do
+            sleep 0.1
+            line=$(xwininfo -root -children | grep "SSVNC")
+          done
           $debug && echo -e "$0[$channel]: line = \"$line\"" 1>&2
           windowid=$(echo "$line" | awk '{ print $1; }')
           $debug && echo -e "$0[$channel]: windowid = \"$windowid\"" 1>&2

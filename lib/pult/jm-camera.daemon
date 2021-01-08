@@ -48,6 +48,7 @@ if [ -z "$url" ]; then
   exit 1
 fi
 
+report_status "listening"
 env python3 "$module_directory/jm-camera.py" "$url" &
 selenium_pid="$!"
 line=$(xwininfo -root -children | grep "Jitsi Meet")

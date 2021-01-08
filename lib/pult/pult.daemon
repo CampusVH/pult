@@ -263,19 +263,27 @@ while true; do
         if [ "$c" = "status" ]; then
           touch "$lock_file"
           s="${cmd[2]}"
-          $debug && echo -e "$0: module $m reported status \"$s\", wid = ${cmd[3]}, w = ${cmd[4]}, h = ${cmd[5]}" 1>&2
+          $debug && echo -e "$0: module $m reported status \"$s\", wid/info = ${cmd[3]}, w = ${cmd[4]}, h = ${cmd[5]}, info = ${cmd[6]}" 1>&2
           module_status["$m"]="$s"
-          if [ "$s" = "waiting" ]; then
-            $debug && echo "$0: background_wid = $background_wid" 1>&2
-            xdotool windowraise "$background_wid"
-            position_primary_module
-            position_all_min_modules
-          elif [ "$s" = "listening" ]; then
+          if [ "$s" = "listening" ]; then
+            info="${cmd[3]}"
+            if [ -n "$info" ]; then
+              module_info["$m"]="$info"
+            fi
             $debug && echo -e "$0: $m: listening, primary_module = $primary_module" 1>&2
             if [ "$primary_module" = "$m" ]; then
               primary_module=""
               find_new_primary_module
             fi
+          elif [ "$s" = "waiting" ]; then
+            info="${cmd[3]}"
+            if [ -n "$info" ]; then
+              module_info["$m"]="$info"
+            fi
+            $debug && echo "$0: background_wid = $background_wid" 1>&2
+            xdotool windowraise "$background_wid"
+            position_primary_module
+            position_all_min_modules
           elif [ "$s" = "running" ]; then
             wid="${cmd[3]}"
             w="${cmd[4]}"
@@ -285,7 +293,9 @@ while true; do
             module_wid["$m"]="$wid"
             module_w["$m"]="$w"
             module_h["$m"]="$h"
-            module_info["$m"]="$info"
+            if [ -n "$info" ]; then
+              module_info["$m"]="$info"
+            fi
             if ! ${module_min["$m"]} || [ -z "$primary_module" ] || ${module_min["$primary_module"]}; then
               $debug && echo -n "min[m] = ${module_min["$m"]}, p = $primary_module" 1>&2
               if [ -n "$primary_module" ]; then

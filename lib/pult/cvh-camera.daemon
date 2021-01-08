@@ -17,6 +17,9 @@ $debug && echo "$0[$channel]: pid_file = $pid_file" 1>&2
 input_fifo="$run_directory/cvh-camera-$channel.input"
 $debug && echo "$0[$channel]: input_fifo = $input_fifo" 1>&2
 
+output_fifo="$run_directory/cvh-camera-$channel.output"
+$debug && echo "$0[$channel]: output_fifo = $output_fifo" 1>&2
+
 module ()
 {
   m="$1"
@@ -76,6 +79,7 @@ if $browser; then
     exit 1
   fi
 
+  report_status "listening" "$token"
   env python3 "$module_directory/cvh-camera.py" "$url" &
   selenium_pid="$!"
   line=$(xwininfo -root -children | grep "novnc\.cvh-server\.de")
@@ -85,6 +89,7 @@ if $browser; then
     line=$(xwininfo -root -children | grep "Camera Receiver $camera_room")
   done
   windowid=$(echo $line | cut -d " " -f 1)
+  report_status "waiting" "$token"
   chromium_pid=$(xdotool getwindowpid "$windowid")
   $debug && echo "$0[$channel]: chromium_pid = $chromium_pid" 1>&2
   rm -rf "$pid_file"
@@ -97,7 +102,7 @@ if $browser; then
 
 elif $direct; then
 
-  report_status "running" "NULL" "$max_width" "$max_height" "$token"
+  report_status "listening" "$token"
 
 else
 

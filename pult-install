@@ -30,7 +30,7 @@ install_directory ()
     true
   else
     echo -n "directory: "
-    mkdir -v "$1"
+    mkdir -pv "$1"
   fi
   chown "$2" "$1"
   chmod "$3" "$1"
@@ -49,11 +49,25 @@ do
   $install -o root -g root -m 755 "sbin/$file" "$sbin_directory/"
 done
 
-$install -o root -g root -m 644 sbin/*.{py,js} "$sbin_directory/"
-$install -o root -g root -m 644 sbin/models/*.js "$sbin_directory/models/"
+$install -o root -g root -m 644 sbin/*.py "$sbin_directory/"
 $install -o root -g root -m 755 lib/pult/*.{module,daemon} "$lib_directory/pult/"
 $install -o root -g root -m 644 lib/pult/*.{py,functions} "$lib_directory/pult/"
 install_symlink "$lib_directory/pult/pult.daemon" "$sbin_directory/pultd"
+for m in accepts base64id/lib cookie debug/dist engine.io-parser/lib \
+         mime-types negotiator socket.io/dist socket.io-parser/dist ws \
+         base64-arraybuffer/lib component-emitter cors/lib engine.io/lib \
+         engine.io/lib/transports mime-db ms object-assign socket.io-adapter/dist \
+         vary; do
+  install_directory "$lib_directory/cvh-camera-server/node_modules/$m" root.root 775
+  $install -o root -g root -m 644 lib/cvh-camera-server/node_modules/$m/*.js "$lib_directory/cvh-camera-server/node_modules/$m/"
+done
+install_directory "$lib_directory/cvh-camera-server/dist" root.root 775
+$install -o root -g root -m 644 lib/cvh-camera-server/dist/*.js "$lib_directory/cvh-camera-server/dist/"
+for m in config io-interface io-interface/handlers models socket-io socket-io/handlers state util; do
+  install_directory "$lib_directory/cvh-camera-server/dist/$m" root.root 775
+  $install -o root -g root -m 644 lib/cvh-camera-server/dist/$m/*.js "$lib_directory/cvh-camera-server/dist/$m/"
+done
+install_symlink "$lib_directory/cvh-camera-server/dist/server.js" "$sbin_directory/cvh-camera-server.js"
 $install -o root -g root -m 644 etc/pult/* "$etc_directory/pult/"
 $install -o root -g root -m 644 etc/pult/* "$etc_directory/pult/"
 

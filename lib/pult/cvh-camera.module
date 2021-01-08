@@ -4,11 +4,13 @@ debug=true
 
 module_name="$PULT_MODULE_NAME"
 channel="$PULT_CHANNEL"
+slot="$CVH_CAMERA_SLOT"
 $debug && echo "$0[$channel]: $module_name $@" 1>&2
 
 camera_room="$((1000 + channel))"
 
 . "/usr/local/etc/pult/pult.conf"
+. "/usr/local/lib/pult/pult.functions"
 
 direct=false
 
@@ -16,7 +18,19 @@ module ()
 {
   m="$1"
   shift 2
-  if [ "$m" = "$module_name" ]; then
+  if [ -n "$CVH_CAMERA_SLOT" ]; then
+    $debug && echo "options for module $m: $*"
+    for opt in "$@"; do
+      case "$opt" in
+        "slot="*)
+          $debug && echo "checking slot $(echo $opt | sed -e 's/^slot=//')" 1>&2
+          if [ "$slot" = "$(echo $opt | sed -e 's/^slot=//')" ]; then
+            module_name="$m"
+          fi
+          ;;
+      esac
+    done
+  elif [ "$m" = "$module_name" ]; then
     for opt in "$@"; do
       $debug && echo "$0[$channel]: option: $opt" 1>&2
       case "$opt" in
@@ -35,6 +49,12 @@ module ()
 }
 
 . "/usr/local/etc/pult/pult-$channel.conf"
+
+if [ -z "$module_name" ]; then
+  echo "module $0 called without module name and without a valid slot" 1>&2
+  exit 1
+fi
+
 $debug && echo "$0[$channel]: camera_room = $camera_room" 1>&2
 
 pid_file="$run_directory/$module_name-$channel.pid"
@@ -42,6 +62,9 @@ $debug && echo "$0[$channel]: pid_file = $pid_file" 1>&2
 
 input_fifo="$run_directory/cvh-camera-$channel.input"
 $debug && echo "$0[$channel]: input_fifo = $input_fifo" 1>&2
+
+max_width=$(echo "$camera_default_max_resolution" | cut -d "x" -f 1)
+max_height=$(echo "$camera_default_max_resolution" | cut -d "x" -f 2)
 
 cmd="$1"
 case "$cmd" in
@@ -80,6 +103,12 @@ case "$cmd" in
         echo "set_geometry_relative_to_canvas $slot lt $4 $5 $2 $3 $6" > "$input_fifo"
       fi
     fi
+    ;;
+  new_feed)
+    report_status "running" "NULL" "$max_width" "$max_height"
+    ;;
+  remove_feed)
+    report_status "listening"
     ;;
   *)
     echo -e "$0[$channel]: invalid command\"$@\""

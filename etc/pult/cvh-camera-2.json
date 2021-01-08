@@ -1,0 +1,5 @@
+{
+  "port": 5002,
+  "cameraSlots": 3,
+  "notifyPath": "/usr/local/var/run/pult/cvh-camera-2.output"
+}
